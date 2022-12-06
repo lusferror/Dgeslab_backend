@@ -7,7 +7,7 @@ from flask_sqlalchemy import SQLAlchemy
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"]="mysql://root:tupassword@localhost/dgeslab"
+app.config["SQLALCHEMY_DATABASE_URI"]="mysql://root:@34.70.198.182/dgeslab"
 
 Migrate(app, db)
 db.init_app(app)
