@@ -19,6 +19,16 @@ class Role(db.Model):
             "description": self.description
         }
 
+class Asignacion(db.Model):
+    id=db.Column(db.Integer,primary_key=True)
+    id_asignacion=db.Column(db.Integer, primary_key=True)
+    serie=db.Column(db.BigInteger, db.ForeignKey('equipos.serie'), primary_key=True) #serie identificadora del equipo
+    fecha_asignacion=db.Column(db.Date,nullable=False)         # fecha de asignacion del equipo
+    tecnico_id=db.Column(db.Integer,db.ForeignKey('user.id'),primary_key=True) # el tecnico_id es el mismo de user_id, solo tome el nombre mas a adecuado para la columna
+    check=db.Column(db.Boolean)              #chequeo de las series
+    estado=db.Column(db.String(20))         #indica si esta pendiente o aprobado
+    revision_movil=db.relationship('revision_movil',backref='Asignacion',lazy=True)
+
 class User(db.Model):
     id=db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250), unique=False, nullable=False)
@@ -39,7 +49,7 @@ class User(db.Model):
             "email": self.email
         }
 
-class Maestro_Series(db.Model):
+class Equipos(db.Model):
     id=db.Column(db.Integer, primary_key=True)
     documento_entrada=db.Column(db.BigInteger, nullable=False)   #indica el numero documento sap o pedido de entrada
     folio=db.Column(db.BigInteger, nullable=False)               #indica la utlima guia de despacho sap-Entel de entrada 
@@ -58,26 +68,18 @@ class Maestro_Series(db.Model):
     b_origen_salida= db.Column(db.String(20), nullable=False)   #bodega de origen de salida de la empresa productora
     b_destino_salida=db.Column(db.String(20), nullable=False)   #bodega de destino de salia (centros de distribucion Entel)
     fecha_despacho=db.Column(db.Date, nullable=False) #indica la ultima fecha de despacho del equipo
-    observaciones=db.Column(db.String(250),nullable=True)
-    create_at=db.Column(db.Date)
-
-    def __repr__(self) -> str:
-        return super().__repr__()
-
-    def serialize (self):
-        return{
-            "serie": self.serie,
-            "denominacion": self.denominacion
-        }
-
-class Bodega(db.Model):
-    id=db.Column(db.Integer, primary_key=True)
-    serie=db.Column(db.BigInteger, unique=True, nullable=False) #serie identificadora del equipo
+    create_at=db.Column(db.Date)                        #Fecha de creación del registro
+    #--------------------------------- Datos de Bodega-------------------------------------------------------------------------
     tipo_caja=db.Column(db.String(2))                           #tipo de caja almacenado, este valor puede ser nulo
     nro_caja=db.Column(db.Integer)                              #numero de caja de almacenado, este valor puede ser nulo
     estante=db.Column(db.Integer)                               #estante donde esta almacenado el equipo
     piso= db.Column(db.Integer)                                 #numero de piso del estante donde se encuentra el equipo
+    #---------------------------------- observaciones generales----------------------------------------------------------------
     observaciones=db.Column(db.String(250),nullable=True)
+    #--------------------------------- relacion----------------------------------------------------------------------------------
+    entrada=db.relationship("Entrada", backref='equipos',lazy=True)
+    asignacion = db.relationship('user', secondary=Asignacion, lazy='subquery',
+        backref=db.backref('equipos', lazy=True))
 
     def __repr__(self) -> str:
         return super().__repr__()
@@ -85,6 +87,7 @@ class Bodega(db.Model):
     def serialize (self):
         return{
             "serie": self.serie,
+            "denominacion": self.denominacion,
             "tipo:caja": self.tipo_caja,
             "numero_caja": self.nro_caja,
             "estante":self.estante,
@@ -92,36 +95,26 @@ class Bodega(db.Model):
             "observaciones":self.observaciones
         }
 
-class Recepcion(db.Model):
+class Entrada(db.Model):
     id=db.Column(db.Integer, primary_key=True)
-    documento=db.Column(db.BigInteger, nullable=False)      #indica el numero documento sap o pedido de entrada
-    folio=db.Column(db.BigInteger, nullable=False)          #indica la guia de despacho sap-Entel de entrada 
-    material=db.Column(db.Integer, nullable=False)          #codigo sku de entel
-    denominacion=db.Column(db.String(100), nullable=False)       #descripcion del equipo
-    serie=db.Column(db.BigInteger, unique=True, nullable=False) #serie identificadora del equipo
-    fecha=db.Column(db.Date)
-    rut=db.Column(db.String(20))    #Rut de la empresa emisora de los equipos
-    b_origen=db.Column(db.String(20),nullable=False) #bodega de origen de envio
-    b_destino=db.Column(db.String(20),nullable=False) #bodega de destino (bodega de empresa productora)
-
-    def __repr__(self) -> str:
-        return super().__repr__()
-
-    def serialize (self):
-        return{
-            "serie": self.serie,
-        }
-
-class Verificacion(db.Model):
-    id=db.Column(db.Integer, primary_key=True)
-    serie=db.Column(db.BigInteger, unique=True, nullable=False) #serie identificadora del equipo
+    documento=db.Column(db.BigInteger, nullable=True)      #indica el numero documento sap o pedido de entrada
+    folio=db.Column(db.BigInteger, nullable=True)          #indica la guia de despacho sap-Entel de entrada 
+    fecha_folio=db.Column(db.Date)
+    material=db.Column(db.Integer, nullable=True)          #codigo sku de entel
+    denominacion=db.Column(db.String(100), nullable=True)       #descripcion del equipo
+    serie=db.Column(db.BigInteger, db.ForeignKey('equipos.serie'), nullable=False) #serie identificadora del equipo
+    rut_empresa=db.Column(db.String(20))    #Rut de la empresa emisora de los equipos
+    b_origen=db.Column(db.String(20)) #bodega de origen de envio
+    b_destino=db.Column(db.String(20)) #bodega de destino (bodega de empresa productora)
+    f_recepcion_fisica=db.Column(db.Date)                #Fecha de recepcion fisica
     f_verificacion=db.Column(db.Date)                           #fecha de verificacion
-    observaciones=db.Column(db.String(250),nullable=True)
-    responsable=db.Column(db.String(10), unique=True, nullable=False)   #quien realiza registro de la verificacion
+    responsable_ver=db.Column(db.String(10))   #quien realiza registro de la verificacion
     tipo_caja=db.Column(db.String(2))                           #tipo de caja almacenado, este valor puede ser nulo
     nro_caja=db.Column(db.Integer)                              #numero de caja de almacenado, este valor puede ser nulo
-    estatus=db.Column(db.String(20))                            #indica si el equipo ya esta almacenado, o esta pendiente almacenaje
-    pedido=db.Column(db.BigInteger,nullable=False)              #el pedido de ingreso del equipo
+    estado=db.Column(db.String(20))                            #indica lo siguiente: pendiente, verificado
+    observaciones=db.Column(db.String(250),nullable=True)
+    
+    
 
     def __repr__(self) -> str:
         return super().__repr__()
@@ -131,22 +124,7 @@ class Verificacion(db.Model):
             "serie": self.serie,
         }
 
-class Asignacion(db.Model):
-    id=db.Column(db.Integer, primary_key=True)
-    fecha=db.Column(db.Date,nullable=False)         #fecha de asignacion al tecnico
-    serie=db.Column(db.BigInteger, unique=True, nullable=False) #serie identificadora del equipo
-    tecnico_id=db.Column(db.Integer, nullable=False)               #id del tecnico asignado
-    check=db.Column(db.Boolean)                                    #chequeo fisico de la serie asignada por sistema es igual a la serie fisica
-    estado=db.Column(db.String(20), nullable=False)                 #corresponde al estado en que se encuentra el equipo de aprobacion (pendiente o aprobado)
-    def __repr__(self) -> str:
-        return super().__repr__()
-
-    def serialize (self):
-        return{
-            "serie": self.serie,
-        }
-
-class Movil(db.Model):
+class Revision_movil(db.Model):
     id=db.Column(db.Integer, primary_key=True)
     serie=db.Column(db.BigInteger, unique=True, nullable=False) #serie identificadora del equipo
     material=db.Column(db.Integer, nullable=False)          #codigo sku de entel
@@ -203,6 +181,9 @@ class Movil(db.Model):
     clasificacion=db.Column(db.String(20))  #campo calculado que indicara si el equipos bueno, rayado, rayado con problemas de sw, problemas de sw, scrap
     ert=db.Column(db.Boolean)      #indica si el equipo sera utilizado como ert
     observaciones=db.Column(db.String(100)) #se anotan los comentarios adicionales
+    #--------------------------------------- relacion ---------------------------------------------
+    id_asignacion=db.Column(db.Integer, db.ForeignKey('asignacion.id')) # esta es la relacion con la asignacion
+    salida=db.relationship('Salida')
 
     def __repr__(self) -> str:
         return super().__repr__()
@@ -212,49 +193,24 @@ class Movil(db.Model):
             "serie": self.serie,
         }
 
-class Empacado(db.Model):
+class Salida(db.Model):
     id=db.Column(db.Integer, primary_key=True)
     serie=db.Column(db.BigInteger, unique=True, nullable=False) #serie identificadora del equipo
-    material=db.Column(db.Integer, nullable=False)          #codigo sku de entel
-    denominacion=db.Column(db.String(100), nullable=False)       #descripcion del equipo
+    material=db.Column(db.Integer)          #codigo sku de entel
+    denominacion=db.Column(db.String(100))       #descripcion del equipo
     empacado=db.Column(db.Boolean)      #indica si ya esta empacado el equipo
-    fecha=db.Column(db.Date)        #fecha de empacado del equipo
+    fecha_empacado=db.Column(db.Date)        #fecha de empacado del equipo
     responsable_id=db.Column(db.Integer)
-
-    def __repr__(self) -> str:
-        return super().__repr__()
-
-    def serialize (self):
-        return{
-            "serie": self.serie,
-        }
-
-class Embalado(db.Model):
-    id=db.Column(db.Integer, primary_key=True)
-    serie=db.Column(db.BigInteger, unique=True, nullable=False) #serie identificadora del equipo
-    material=db.Column(db.Integer, nullable=False)          #codigo sku de entel
-    denominacion=db.Column(db.String(100), nullable=False)       #descripcion del equipo
     tipo_caja=db.Column(db.String(2))               #tipo de caja donde esta embalado el equipo, para este caso tendra valor fijo de "DM"
     nro_caja=db.Column(db.Integer)                  #numero de caja emitido por el sistema
-    fecha=db.Column(db.Date)                        #fecha de embalado
-
-    def __repr__(self) -> str:
-        return super().__repr__()
-
-    def serialize (self):
-        return{
-            "serie": self.serie,
-        }
-
-class Despacho(db.Model):
-    id=db.Column(db.Integer, primary_key=True)
-    serie=db.Column(db.BigInteger, unique=True, nullable=False) #serie identificadora del equipo
-    documento=db.Column(db.BigInteger, nullable=False)      #indica el numero documento sap o pedido de entrada
-    guia_despacho=db.Column(db.Integer, nullable=False)         #indica la utlima guia de despacho de la empresa productora
-    b_origen_salida= db.Column(db.String(20), nullable=False)   #bodega de origen de salida de la empresa productora
-    b_destino_salida=db.Column(db.String(20), nullable=False)   #bodega de destino de salia (centros de distribucion Entel)
-    fecha=db.Column(db.Date, nullable=False)                    #indica la fecha de emsion del documento sap
+    fecha_embalaje=db.Column(db.Date)                        #fecha de embalado
+    documento=db.Column(db.BigInteger)      #indica el numero documento sap o pedido de entrada
+    guia_despacho=db.Column(db.Integer)         #indica la utlima guia de despacho de la empresa productora
+    b_origen_salida= db.Column(db.String(20))   #bodega de origen de salida de la empresa productora
+    b_destino_salida=db.Column(db.String(20))   #bodega de destino de salia (centros de distribucion Entel)
+    fecha_documento=db.Column(db.Date)                    #indica la fecha de emsion del documento sap
     f_despacho_fisico=db.Column(db.Date)                        #indica la fecha de despacho fisico
+    revision_movil_id=db.Column(db.Integer, db.ForeignKey('revision_movil.id'))
 
     def __repr__(self) -> str:
         return super().__repr__()
