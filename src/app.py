@@ -5,11 +5,17 @@ from models import db, User, Role
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-# from utils import APIException, generate_sitemap #Averiguar como importar esto
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import JWTManager
+from flask_jwt_extended import jwt_required
+from flask_jwt_extended import get_jwt_identity
+
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"]="mysql://root:@34.70.198.182/dgeslab"
+app.config["JWT_SECRET_KEY"] = "super-secret"  # Change this!
+jwt = JWTManager(app)
 
 Migrate(app, db)
 db.init_app(app)
@@ -57,10 +63,12 @@ def registerUsers():
         return "Add user email", 400
     if 'rut' not in body:
         return "Add user rut", 400
+    if 'password' not in body:
+        return "Add user password", 400    
     if 'role_id' not in body:
         return "Add user rut", 400                 
 
-    new_user = User(name=body["name"], second_name=body["second_name"], last_name=body["last_name"], second_last_name=body["second_last_name"], email=body["email"], rut=body["rut"], create_at=create_at, role_id=body["role_id"])
+    new_user = User(name=body["name"], second_name=body["second_name"], last_name=body["last_name"], second_last_name=body["second_last_name"], email=body["email"], rut=body["rut"], password=body["password"], create_at=create_at, role_id=body["role_id"])
 
     db.session.add(new_user) 
 
@@ -150,16 +158,49 @@ def updateUser(id):
     
     return 'ok'
 
-#Tengo que averiguar como importar el APIException
-# @app.route('/role/<int:id>', methods=['DELETE'])
-# def deleteRole(id):
-#     user1 = Role.query.get(id)
-#     if user1 == None:
-#         raise APIException('User not found', status_code=404)
-#     db.session.delete(user1)
-#     db.session.commit()  
-#     return 'User deleted'
+#Para borrar la información de los roles
+@app.route('/role/<int:id>', methods=['DELETE'])
+def deleteRole(id):
+    role1 = Role.query.get(id)
+    if role1 == None:
+        return "User not found", 404
+    db.session.delete(role1)
+    db.session.commit()  
+    return 'Role deleted'
+
+@app.route('/user/<int:id>', methods=['DELETE'])
+def deleteUser(id):
+    user1 = User.query.get(id)
+    if user1 == None:
+        return "User not found", 404
+    db.session.delete(user1)
+    db.session.commit()  
+    return 'User deleted'
+
+@app.route("/token", methods=["POST"])
+def create_token():
+    email = request.json.get("email", None)
+    password = request.json.get("password", None)
+
+    user = User.query.filter_by(email=email, password=password).first()
+
+    if user is None:
+        return jsonify({"Email or password incorrect"}), 401    
+
+    access_token = create_access_token(identity=user.id)
+
+    return jsonify({ "token": access_token}), 200
+
+@app.route("/private", methods=["GET"])
+@jwt_required()
+def protected():
+
+    current_user_id = get_jwt_identity()
+
+    user = User.query.get(current_user_id)
+    
+    return jsonify({"msg": "ok"}), 200            
     
 
-# if __name__=='__main__':
-#     app.run(port=3100, debug=True)
+if __name__=='__main__':
+    app.run(port=3100, debug=True)
