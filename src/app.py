@@ -7,7 +7,8 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
 from routes import api
-=======
+
+
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import JWTManager
 from flask_jwt_extended import jwt_required
