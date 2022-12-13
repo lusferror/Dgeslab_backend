@@ -19,15 +19,15 @@ class Role(db.Model):
             "description": self.description
         }
 
-class Asignacion(db.Model):
-    id=db.Column(db.Integer,primary_key=True)
-    id_asignacion=db.Column(db.Integer, primary_key=True)
-    serie=db.Column(db.BigInteger, db.ForeignKey('equipos.serie'), primary_key=True) #serie identificadora del equipo
-    fecha_asignacion=db.Column(db.Date,nullable=False)         # fecha de asignacion del equipo
-    tecnico_id=db.Column(db.Integer,db.ForeignKey('user.id'),primary_key=True) # el tecnico_id es el mismo de user_id, solo tome el nombre mas a adecuado para la columna
-    check=db.Column(db.Boolean)              #chequeo de las series
-    estado=db.Column(db.String(20))         #indica si esta pendiente o aprobado
-    revision_movil=db.relationship('revision_movil',backref='Asignacion',lazy=True)
+# class Asignacion(db.Model):
+#     id=db.Column(db.Integer,primary_key=True)
+#     id_asignacion=db.Column(db.Integer, primary_key=True)
+#     serie=db.Column(db.BigInteger, db.ForeignKey('equipos.serie'), primary_key=True) #serie identificadora del equipo
+#     fecha_asignacion=db.Column(db.Date,nullable=False)         # fecha de asignacion del equipo
+#     tecnico_id=db.Column(db.Integer,db.ForeignKey('user.id'),primary_key=True) # el tecnico_id es el mismo de user_id, solo tome el nombre mas a adecuado para la columna
+#     check=db.Column(db.Boolean)              #chequeo de las series
+#     estado=db.Column(db.String(20))         #indica si esta pendiente o aprobado
+#     # revision_movil=db.relationship('revision_movil',backref='Asignacion',lazy=True)
 
 class User(db.Model):
     id=db.Column(db.Integer, primary_key=True)
@@ -37,6 +37,7 @@ class User(db.Model):
     second_last_name=db.Column(db.String(100))
     email = db.Column(db.String(250), unique=True, nullable=False)
     rut=db.Column(db.String(10), unique=True, nullable=False)
+    password=db.Column(db.String(10), unique=True, nullable=False)
     create_at=db.Column(db.Date)
     role_id=db.Column(db.Integer, db.ForeignKey('role.id'),nullable=False)
 
@@ -45,6 +46,7 @@ class User(db.Model):
 
     def serialize (self):
         return{
+            "id":self.id, #Lo agrgeue para conocer el id del user y poder hacer los otros metodos
             "name": self.name,
             "email": self.email
         }
@@ -78,8 +80,8 @@ class Equipos(db.Model):
     observaciones=db.Column(db.String(250),nullable=True)
     #--------------------------------- relacion----------------------------------------------------------------------------------
     entrada=db.relationship("Entrada", backref='equipos',lazy=True)
-    asignacion = db.relationship('user', secondary=Asignacion, lazy='subquery',
-        backref=db.backref('equipos', lazy=True))
+    # asignacion = db.relationship('user', secondary=Asignacion, lazy='subquery',
+    #     backref=db.backref('equipos', lazy=True))
 
     def __repr__(self) -> str:
         return super().__repr__()
@@ -182,7 +184,7 @@ class Revision_movil(db.Model):
     ert=db.Column(db.Boolean)      #indica si el equipo sera utilizado como ert
     observaciones=db.Column(db.String(100)) #se anotan los comentarios adicionales
     #--------------------------------------- relacion ---------------------------------------------
-    id_asignacion=db.Column(db.Integer, db.ForeignKey('asignacion.id')) # esta es la relacion con la asignacion
+    # id_asignacion=db.Column(db.Integer, db.ForeignKey('asignacion.id')) # esta es la relacion con la asignacion
     salida=db.relationship('Salida')
 
     def __repr__(self) -> str:
