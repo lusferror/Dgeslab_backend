@@ -163,6 +163,7 @@ def register_RevisionMovil():
     id  =  request.json.get("id",None)
     serie = request.json.get("serie",None)
     material = request.json.get("material",None)
+    denominacion = request.json.get("denominacion",None)
     tecnico_id=request.json.get("tecnico_id", None)
     fecha=request.json.get("fecha", None)
     encendido = request.json.get("encendido", None)
