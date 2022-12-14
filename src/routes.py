@@ -122,7 +122,7 @@ def register_asignacion():
         "estado"  : new_asignacion.estado
     })
 
-@app.route('/asignacion/<int:id>', methods=['PUT'])
+@api.route('/asignacion/<int:id>', methods=['PUT'])
 def updateAsignacion(id):
     asignacionM = Asignacion.query.get(id)
     RQ = request.get_json()
@@ -135,7 +135,7 @@ def updateAsignacion(id):
 
 
 
-@app.route('/asignacion/<int:id>', methods=['DELETE'])
+@api.route('/asignacion/<int:id>', methods=['DELETE'])
 def deleteAsignacion(id):
     asignacionM = Asignacion.query.get(id)
     db.session.delete(asignacionM)
@@ -284,7 +284,7 @@ def register_RevisionMovil():
         
     })
 
-@app.route('/revision_movil/<int:id>', methods=['PUT'])
+@api.route('/revision_movil/<int:id>', methods=['PUT'])
 def updateRevisionMovil(id):
     RevisionM = Revision_movil.query.get(id)
     RQ = request.get_json()
@@ -344,7 +344,7 @@ def updateRevisionMovil(id):
     return 'ok'
 
 
-@app.route('/revision_movil/<int:id>', methods=['DELETE'])
+@api.route('/revision_movil/<int:id>', methods=['DELETE'])
 def deleteRevision(id):
     RevisionM = Asignacion.query.get(id)
     db.session.delete(RevisionM)
