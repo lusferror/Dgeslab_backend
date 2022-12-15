@@ -48,7 +48,8 @@ class User(db.Model):
         return{
             "id":self.id, #Lo agrgeue para conocer el id del user y poder hacer los otros metodos
             "name": self.name,
-            "email": self.email
+            "email": self.email,
+            "create_at": self.create_at
         }
 
 class Equipos(db.Model):
