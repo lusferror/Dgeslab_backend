@@ -7,7 +7,7 @@ from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
 from routes import api
-
+from models import db
 
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import JWTManager
@@ -19,6 +19,7 @@ BASEDIR = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"]="mysql://root:@34.70.198.182/dgeslab"
+
 app.config["JWT_SECRET_KEY"] = "super-secret"  # Change this!
 jwt = JWTManager(app)
 
@@ -210,7 +211,6 @@ def protected():
     
     return jsonify({"msg": "ok"}), 200            
     
-
 
 if __name__=='__main__':
     app.run(port=3100, debug=True)
