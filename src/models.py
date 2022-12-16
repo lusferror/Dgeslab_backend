@@ -48,8 +48,13 @@ class User(db.Model):
         return{
             "id":self.id, #Lo agrgeue para conocer el id del user y poder hacer los otros metodos
             "name": self.name,
+            "second_name": self.second_name,
+            "last_name": self.last_name,
+            "second_last_name": self.second_last_name,
             "email": self.email,
-            "create_at": self.create_at
+            "rut": self.rut,
+            "create_at": self.create_at,
+            "role_id": self.role_id
         }
 
 class Equipos(db.Model):
