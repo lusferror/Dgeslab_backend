@@ -8,6 +8,9 @@ from models import db, User, Role
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
+
+from routes import api
+
 from flask_jwt_extended import create_access_token
 # from flask_jwt_extended import get_jwt
 from flask_jwt_extended import JWTManager
@@ -22,6 +25,7 @@ app = Flask(__name__)
 # app.config["JWT_COOKIE_SECURE"] = False
 # app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
 app.config["SQLALCHEMY_DATABASE_URI"]="mysql://root:@34.70.198.182/dgeslab"
+
 app.config["JWT_SECRET_KEY"] = "super-secret"  # Change this!
 # app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 
@@ -44,6 +48,8 @@ jwt = JWTManager(app)
 Migrate(app, db)
 db.init_app(app)
 CORS(app)
+
+app.register_blueprint(api)
 
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):

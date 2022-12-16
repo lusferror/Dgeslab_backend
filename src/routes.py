@@ -1,7 +1,12 @@
 
 from flask import Flask, request, jsonify, url_for, Blueprint
-from models import db, Salida
+from models import db, Salida, Revision_movil
 import json
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required
+import datetime
+
 
 api = Blueprint('api', __name__)
 
@@ -14,28 +19,29 @@ def home():
 def get_salida():
     try:
         salidas = db.session.query(Salida).all()
-        list_user = list()
+        list_sal = list()
         for salida in salidas:
-            print('salida-->>', salida)
-            list_user.append({"documento": salida.documento, "serie": salida.serie})
-        print(salidas)
-        return jsonify({"users:", list_user}), 200
+            print('salida-->>', salida.serie)
+            fecha_documento = salida.fecha_documento.strftime('%d/%m/%Y')            
+            f_despacho_fisico = salida.f_despacho_fisico.strftime('%d/%m/%Y')            
+            list_sal.append(
+                {
+                    "documento": salida.documento, 
+                    "serie": salida.serie, 
+                    "fecha_documento": fecha_documento, 
+                    "b_origen_salida": salida.b_origen_salida, 
+                    "b_destino_salida": salida.b_destino_salida, 
+                    "guia_despacho": salida.guia_despacho, 
+                    "f_despacho_fisico": f_despacho_fisico
+                })
+        print(list_sal)
+        return jsonify({"salida": list_sal}), 200
     except Exception as e:
         mens=str(e)
         error = {'Error':mens}
         print('Error: ', error)
         return jsonify({"message":error}), 500
 
-
-
-    # try:
-    #     salida = db.session.query(Salida).all()
-    #     if salida is not None:
-    #         return jsonify(salida.serialize()), 200
-    #     else:
-    #         return jsonify({"message":"salida not exist data"}), 404
-    # except Exception as e:
-    #     return jsonify({"message":e}), 500
 
 @api.route('/salida/<int:id>', methods = ['PUT'])
 def update_salida(id):
@@ -44,11 +50,19 @@ def update_salida(id):
         if salida is not None:
             salida.documento = request.json.get("documento")
             salida.serie = request.json.get("serie")
-            salida.fechadocumento = request.json.get("fechadocumento")
+
+            strFecha = request.json.get("fecha_documento")
+            fecha = datetime.datetime.strptime(strFecha, '%d/%m/%Y').date()
+            salida.fechadocumento = fecha
+
             salida.b_origen_salida = request.json.get("b_origen_salida")
             salida.b_destino_salida = request.json.get("b_destino_salida")
             salida.guia_despacho = request.json.get("guia_despacho")
-            salida.f_despacho_fisico = request.json.get("f_despacho_fisico")
+
+            strFecha = request.json.get("f_despacho_fisico")
+            fecha = datetime.datetime.strptime(strFecha, '%d/%m/%Y').date()
+            salida.f_despacho_fisico = fecha
+
             db.session.commit()
             return jsonify(salida.serialize()), 200
         else:
@@ -67,17 +81,32 @@ def create_salida():
         salida.material = request.json.get("material")
         salida.denominacion = request.json.get("denominacion")
         salida.empacado = request.json.get("empacado")
-        salida.fecha_empacado = request.json.get("fecha_empacado")
+
+        strFecha = request.json.get("fecha_empacado")
+        fecha = datetime.datetime.strptime(strFecha, '%d/%m/%Y').date()
+        salida.fecha_empacado = fecha
+
         salida.responsable_id = request.json.get("responsable_id")
         salida.tipo_caja = request.json.get("tipo_caja")
         salida.nro_caja = request.json.get("nro_caja")
-        salida.fecha_embalaje = request.json.get("fecha_embalaje")
+
+        strFecha = request.json.get("fecha_embalaje")
+        fecha = datetime.datetime.strptime(strFecha, '%d/%m/%Y').date()
+        salida.fecha_embalaje = fecha
+
         salida.documento = request.json.get("documento")
         salida.guia_despacho = request.json.get("guia_despacho")
         salida.b_origen_salida = request.json.get("b_origen_salida")
         salida.b_destino_salida = request.json.get("b_destino_salida")
-        salida.fecha_documento = request.json.get("fecha_documento")
-        salida.f_despacho_fisico = request.json.get("f_despacho_fisico")
+
+        strFecha = request.json.get("fecha_documento")
+        fecha = datetime.datetime.strptime(strFecha, '%d/%m/%Y').date()
+        salida.fecha_documento = fecha
+
+        strFecha = request.json.get("f_despacho_fisico")
+        fecha = datetime.datetime.strptime(strFecha, '%d/%m/%Y').date()
+        salida.f_despacho_fisico = fecha
+
         salida.revision_movil_id = request.json.get("revision_movil_id")
         db.session().add(salida)
         db.session().commit()
@@ -89,60 +118,58 @@ def create_salida():
         print('Error: ', error)
         return jsonify({"message":error}), 500
 
-<<<<<<< HEAD
-=======
-@api.route("/asignacion", methods=["GET"])
-def getAsignacion():
+# @api.route("/asignacion", methods=["GET"])
+# def getAsignacion():
 
-    asignacion = Asignacion.query.all()
-    asignacion_list = list(map(lambda x: x.serialize(), asignacion))    
+#     asignacion = Asignacion.query.all()
+#     asignacion_list = list(map(lambda x: x.serialize(), asignacion))    
     
-    return jsonify(asignacion_list)
+#     return jsonify(asignacion_list)
 
 
-@api.route("/asignacion", methods=["POST"])
-def register_asignacion():
-    id  =  request.json.get("id",None)
-    id_asignacion= request.json.get("id_asignacion",None)
-    fecha_asignacion =  request.json.get("fecha_asignacion",None)
-    serie=request.json.get("serie", None)
-    check = request.json.get("check", None)
-    estado= request.json.get("estado", None) 
+# @api.route("/asignacion", methods=["POST"])
+# def register_asignacion():
+#     id  =  request.json.get("id",None)
+#     id_asignacion= request.json.get("id_asignacion",None)
+#     fecha_asignacion =  request.json.get("fecha_asignacion",None)
+#     serie=request.json.get("serie", None)
+#     check = request.json.get("check", None)
+#     estado= request.json.get("estado", None) 
 
 
-    new_asignacion = Asignacion( id=id, id_asignacion=id_asignacion ,fecha_asignacion=fecha_asignacion, serie=serie , check = check, estado=estado)    
+#     new_asignacion = Asignacion( id=id, id_asignacion=id_asignacion ,fecha_asignacion=fecha_asignacion, serie=serie , check = check, estado=estado)    
 
-    db.session.add(new_asignacion)
-    db.session.commit()
+#     db.session.add(new_asignacion)
+#     db.session.commit()
 
-    return jsonify({
-        "id": new_asignacion.id,
-        "id_asignacion": new_asignacion.id_asignacion,
-        "fecha_asignacion": new_asignacion.fecha_asignacion,
-        "serie" : new_asignacion.serie,
-        "check"  : new_asignacion.check,
-        "estado"  : new_asignacion.estado
-    })
+#     return jsonify({
+#         "id": new_asignacion.id,
+#         "id_asignacion": new_asignacion.id_asignacion,
+#         "fecha_asignacion": new_asignacion.fecha_asignacion,
+#         "serie" : new_asignacion.serie,
+#         "check"  : new_asignacion.check,
+#         "estado"  : new_asignacion.estado
+#     })
 
-@api.route('/asignacion/<int:id>', methods=['PUT'])
-def updateAsignacion(id):
-    asignacionM = Asignacion.query.get(id)
-    RQ = request.get_json()
-    asignacionM.fecha_asignacion = RQ["fecha_asignacion"]
-    asignacionM.serie = RQ["serie"]
-    asignacionM.check = RQ["check"]
-    asignacionM.estado = RQ["estado"]
-    db.session.commit()            
-    return 'ok'
+# @api.route('/asignacion/<int:id>', methods=['PUT'])
+# def updateAsignacion(id):
+#     asignacionM = Asignacion.query.get(id)
+#     RQ = request.get_json()
+#     asignacionM.fecha_asignacion = RQ["fecha_asignacion"]
+#     asignacionM.serie = RQ["serie"]
+#     asignacionM.check = RQ["check"]
+#     asignacionM.estado = RQ["estado"]
+#     db.session.commit()            
+#     return 'ok'
 
 
 
-@api.route('/asignacion/<int:id>', methods=['DELETE'])
-def deleteAsignacion(id):
-    asignacionM = Asignacion.query.get(id)
-    db.session.delete(asignacionM)
-    db.session.commit()  
-    return 'Asignacion Borrada'
+# @api.route('/asignacion/<int:id>', methods=['DELETE'])
+# def deleteAsignacion(id):
+#     asignacionM = Asignacion.query.get(id)
+#     db.session.delete(asignacionM)
+#     db.session.commit()  
+#     return 'Asignacion Borrada'
     
 
 
@@ -167,7 +194,13 @@ def register_RevisionMovil():
     material = request.json.get("material",None)
     denominacion = request.json.get("denominacion",None)
     tecnico_id=request.json.get("tecnico_id", None)
-    fecha=request.json.get("fecha", None)
+
+    # fecha=request.json.get("fecha", None) # --- fecha
+    strFecha = request.json.get("fecha", None)
+    print('FECHA:', strFecha)
+    fecha = datetime.datetime.strptime(strFecha, '%d/%m/%Y').date()
+    print('FECHA2:', fecha)
+
     encendido = request.json.get("encendido", None)
     #----revision cosmetica----
     frontal= request.json.get("frontal", None) 
@@ -214,7 +247,13 @@ def register_RevisionMovil():
     act_sw= request.json.get("act_sw", None)
     restauracion= request.json.get("restauracion", None)
     #------fin revision-----------
-    fecha_rev= request.json.get("fecha_rev", None)
+    # fecha_rev= request.json.get("fecha_rev", None)# --- fecha
+
+    strFecha = request.json.get("fecha_rev", None)
+    print('FECHA:', strFecha)
+    fecha_rev = datetime.datetime.strptime(strFecha, '%d/%m/%Y').date()
+    print('FECHA2:', fecha)
+
     clasificacion= request.json.get("clasificacion", None)
     ert= request.json.get("ert", None)
     observaciones= request.json.get("observaciones", None)
@@ -347,23 +386,22 @@ def updateRevisionMovil(id):
     return 'ok'
 
 
-@api.route('/revision_movil/<int:id>', methods=['DELETE'])
-def deleteRevision(id):
-    RevisionM = Asignacion.query.get(id)
-    db.session.delete(RevisionM)
-    db.session.commit()  
-    return 'reivision Borrada'
+# @api.route('/revision_movil/<int:id>', methods=['DELETE'])
+# def deleteRevision(id):
+#     RevisionM = Asignacion.query.get(id)
+#     db.session.delete(RevisionM)
+#     db.session.commit()  
+#     return 'reivision Borrada'
 
->>>>>>> 588324c8b597124ce404996f1ef5f09edc29c91a
-import os
-from flask import Flask, request, jsonify, url_for, Blueprint
-# from api.models import db, User
-# from api.utils import generate_sitemap, APIException
-from flask_jwt_extended import create_access_token
-from flask_jwt_extended import get_jwt_identity
-from flask_jwt_extended import jwt_required
-from typing import List
+# import os
+# from flask import Flask, request, jsonify, url_for, Blueprint
+# # from api.models import db, User
+# # from api.utils import generate_sitemap, APIException
+# from flask_jwt_extended import create_access_token
+# from flask_jwt_extended import get_jwt_identity
+# from flask_jwt_extended import jwt_required
+# from typing import List
 
-api = Blueprint('api', __name__)
+
 
 
