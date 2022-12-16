@@ -183,7 +183,7 @@ def datos_movil_basico():
         print(serie)
         datos= Equipos.query.filter_by(serie=serie).one_or_none()
         print("resultado: ",datos)
-        return jsonify({"result":datos})
+        return jsonify({"denominacion":datos.denominacion})
     except Exception as e:
         print(e)
         return jsonify({"msg":"error"})
