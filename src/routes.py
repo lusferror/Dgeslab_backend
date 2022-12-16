@@ -118,8 +118,8 @@ def create_salida():
         print('Error: ', error)
         return jsonify({"message":error}), 500
 
-@api.route("/asignacion", methods=["GET"])
-def getAsignacion():
+# @api.route("/asignacion", methods=["GET"])
+# def getAsignacion():
 
 #     asignacion = Asignacion.query.all()
 #     asignacion_list = list(map(lambda x: x.serialize(), asignacion))    
