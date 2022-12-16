@@ -19,15 +19,15 @@ class Role(db.Model):
             "description": self.description
         }
 
-# class Asignacion(db.Model):
-#     id=db.Column(db.Integer,primary_key=True)
-#     id_asignacion=db.Column(db.Integer, primary_key=True)
-#     serie=db.Column(db.BigInteger, db.ForeignKey('equipos.serie'), primary_key=True) #serie identificadora del equipo
-#     fecha_asignacion=db.Column(db.Date,nullable=False)         # fecha de asignacion del equipo
-#     tecnico_id=db.Column(db.Integer,db.ForeignKey('user.id'),primary_key=True) # el tecnico_id es el mismo de user_id, solo tome el nombre mas a adecuado para la columna
-#     check=db.Column(db.Boolean)              #chequeo de las series
-#     estado=db.Column(db.String(20))         #indica si esta pendiente o aprobado
-#     # revision_movil=db.relationship('revision_movil',backref='Asignacion',lazy=True)
+class Asignacion(db.Model):
+    id=db.Column(db.Integer,primary_key=True)
+    id_asignacion=db.Column(db.Integer, primary_key=True)
+    serie=db.Column(db.BigInteger, db.ForeignKey('equipos.serie'), primary_key=True) #serie identificadora del equipo
+    fecha_asignacion=db.Column(db.Date,nullable=False)         # fecha de asignacion del equipo
+    tecnico_id=db.Column(db.Integer,db.ForeignKey('user.id'),primary_key=True) # el tecnico_id es el mismo de user_id, solo tome el nombre mas a adecuado para la columna
+    check=db.Column(db.Boolean)              #chequeo de las series
+    estado=db.Column(db.String(20))         #indica si esta pendiente o aprobado
+    # revision_movil=db.relationship('revision_movil',backref='Asignacion',lazy=True)
 
 class User(db.Model):
     id=db.Column(db.Integer, primary_key=True)
@@ -48,29 +48,34 @@ class User(db.Model):
         return{
             "id":self.id, #Lo agrgeue para conocer el id del user y poder hacer los otros metodos
             "name": self.name,
+            "second_name": self.second_name,
+            "last_name": self.last_name,
+            "second_last_name": self.second_last_name,
             "email": self.email,
-            "create_at": self.create_at
+            "rut": self.rut,
+            "create_at": self.create_at,
+            "role_id": self.role_id
         }
 
 class Equipos(db.Model):
     id=db.Column(db.Integer, primary_key=True)
-    documento_entrada=db.Column(db.BigInteger, nullable=False)   #indica el numero documento sap o pedido de entrada
-    folio=db.Column(db.BigInteger, nullable=False)               #indica la utlima guia de despacho sap-Entel de entrada 
-    fecha_folio=db.Column(db.Date, nullable=False)   #indica la utlimo fecha del documento sap de entrada 
-    material=db.Column(db.Integer, nullable=False)              #codigo sku de entel
-    denominacion=db.Column(db.String(100), nullable=False)       #descripcion del equipo
-    serie=db.Column(db.BigInteger, unique=True, nullable=False)  #serie identificadora del equipo
-    b_origen_entrada=db.Column(db.String(20), nullable=False)   #bodega de origen de entrada
-    b_destino_entrada=db.Column(db.String(20), nullable=False)  #bodega destino de entrada, debe indicar una bodega de la empresa que produce (Ej: Yelou)
+    documento_entrada=db.Column(db.BigInteger, nullable=True)   #indica el numero documento sap o pedido de entrada
+    folio=db.Column(db.BigInteger)               #indica la utlima guia de despacho sap-Entel de entrada 
+    fecha_folio=db.Column(db.Date)   #indica la utlimo fecha del documento sap de entrada 
+    material=db.Column(db.Integer)              #codigo sku de entel
+    denominacion=db.Column(db.String(100))       #descripcion del equipo
+    serie=db.Column(db.BigInteger, unique=True)  #serie identificadora del equipo
+    b_origen_entrada=db.Column(db.String(20), )   #bodega de origen de entrada
+    b_destino_entrada=db.Column(db.String(20),)  #bodega destino de entrada, debe indicar una bodega de la empresa que produce (Ej: Yelou)
     fecha_recepcion=db.Column(db.Date)               #la utlima fecha en que se recibio el equipo fisicamente
     fecha_verificacion=db.Column(db.Date)            #la utlima fecha en que se verifico el euqipo fisicamente
-    estado_bodega=db.Column(db.String(20), nullable=False)      #estado en que se encuentra fisicamente (recibido,bodega,laboratorio,despachado)
-    estado_prod=db.Column(db.String(20), nullable=False)        #estado en que se encuentra el equipo en proceso productivo (sin procesar, procesando, terminado)
-    documento_salida=db.Column(db.BigInteger, nullable=False)    #indica el utlimo numero documento sap o pedido de salida
-    guia_despacho=db.Column(db.Integer, nullable=False)         #indica la utlima guia de despacho de la empresa productora
-    b_origen_salida= db.Column(db.String(20), nullable=False)   #bodega de origen de salida de la empresa productora
-    b_destino_salida=db.Column(db.String(20), nullable=False)   #bodega de destino de salia (centros de distribucion Entel)
-    fecha_despacho=db.Column(db.Date, nullable=False) #indica la ultima fecha de despacho del equipo
+    estado_bodega=db.Column(db.String(20),)      #estado en que se encuentra fisicamente (recibido,bodega,laboratorio,despachado)
+    estado_prod=db.Column(db.String(20), )        #estado en que se encuentra el equipo en proceso productivo (sin procesar, procesando, terminado)
+    documento_salida=db.Column(db.BigInteger, )    #indica el utlimo numero documento sap o pedido de salida
+    guia_despacho=db.Column(db.Integer, )         #indica la utlima guia de despacho de la empresa productora
+    b_origen_salida= db.Column(db.String(20), )   #bodega de origen de salida de la empresa productora
+    b_destino_salida=db.Column(db.String(20), )   #bodega de destino de salia (centros de distribucion Entel)
+    fecha_despacho=db.Column(db.Date, ) #indica la ultima fecha de despacho del equipo
     create_at=db.Column(db.Date)                        #Fecha de creación del registro
     #--------------------------------- Datos de Bodega-------------------------------------------------------------------------
     tipo_caja=db.Column(db.String(2))                           #tipo de caja almacenado, este valor puede ser nulo
@@ -193,7 +198,57 @@ class Revision_movil(db.Model):
 
     def serialize (self):
         return{
-            "serie": self.serie,
+           "id": self.id,
+        "serie": self.serie,
+        "material": self.material,
+        "denominacion" : self.denominacion,
+        "tecnico_id"  : self.tecnico_id,
+        "fecha"  : self.fecha,
+        "encendido" : self.encendido,
+        "frontal"  : self.frontal,
+        "frontal_r"  : self.frontal_r,
+        "trasera" : self.trasera,
+        "trasera_r"  : self.trasera_r,
+        "superior"  : self.superior,
+        "superior_r" : self.superior_r,
+        "inferior"  : self.inferior,
+        "inferior_r"  : self.inferior_r,
+        "izquierdo" : self.izquierdo,
+        "izquierdo_r"  : self.izquierdo_r,
+        "derecho"  : self.derecho,
+        "derecho_r" : self.derecho_r,
+        "puntaje_cos"  : self.puntaje_cos,
+        "pantalla"  : self.pantalla,
+        "tactil" : self.tactil,
+        "mic"  : self.mic,
+        "audio"  : self.audio,
+        "bateria" : self.bateria,
+        "conector_c"  : self.conector_c,
+        "bluetooth"  : self.bluetooth,
+        "wifi" : self.wifi,
+        "zona_w"  : self.zona_w,
+        "nfc"  : self.nfc,
+        "conector_a"  : self.conector_a,
+        "porta_sim"  : self.porta_sim,
+        "filtracion"  : self.filtracion,
+        "llamadas_e"  : self.llamadas_e,
+        "llamadas_r"  : self.llamadas_r,
+        "msj_e"  : self.msj_e,
+        "msj_r"  : self.msj_r,
+        "foto_f"  : self.foto_f,
+        "foto_t"  : self.foto_t,
+        "video_f"  : self.video_f,
+        "video_t"  : self.video_t,
+        "sen_proximidad"  : self.sen_proximidad,
+        "vibrador"  : self.vibrador,
+        "puntaje_tec"  : self.puntaje_tec,
+        "bloqueo"  : self.bloqueo,
+        "act_sw"  : self.act_sw,
+        "restauracion"  : self.restauracion,
+        "fecha_rev"  : self.fecha_rev,
+        "clasificacion"  : self.clasificacion,
+        "ert"  : self.ert,
+        "observaciones"  : self.observaciones
         }
 
 class Salida(db.Model):
