@@ -273,131 +273,131 @@ def register_RevisionMovil():
     observaciones= request.json.get("observaciones", None)
 
 
-    new_Revision = Revision_movil( id=id, serie=serie ,material=material, denominacion=denominacion, tecnico_id=tecnico_id , fecha = fecha, encendido=encendido, 
-    frontal=frontal, frontal_r=frontal_r, trasera=trasera, trasera_r=trasera_r, superior=superior, superior_r=superior_r, inferior=inferior
-    , inferior_r=inferior_r, izquierdo=izquierdo, izquierdo_r=izquierdo_r, derecho=derecho, derecho_r=derecho_r, puntaje_cos=puntaje_cos
-    , pantalla=pantalla, tactil=tactil, botones=botones, mic=mic, audio=audio, bateria=bateria, conector_c=conector_c, bluetooth=bluetooth, wifi=wifi
-    , zona_w=zona_w, nfc=nfc, conector_a=conector_a, porta_sim=porta_sim, filtracion=filtracion
-    ,llamadas_e=llamadas_e, llamadas_r=llamadas_r, msj_e=msj_e, msj_r=msj_r, foto_f=foto_f, foto_t=foto_t, 
-    video_f=video_f, video_t=video_t, sen_proximidad=sen_proximidad, vibrador=vibrador, puntaje_tec=puntaje_tec, bloqueo=bloqueo,
-    act_sw=act_sw, restauracion=restauracion, fecha_rev=fecha_rev, clasificacion=clasificacion, ert=ert, observaciones=observaciones)    
+    # new_Revision = Revision_movil( id=id, serie=serie ,material=material, denominacion=denominacion, tecnico_id=tecnico_id , fecha = fecha, encendido=encendido, 
+    # frontal=frontal, frontal_r=frontal_r, trasera=trasera, trasera_r=trasera_r, superior=superior, superior_r=superior_r, inferior=inferior
+    # , inferior_r=inferior_r, izquierdo=izquierdo, izquierdo_r=izquierdo_r, derecho=derecho, derecho_r=derecho_r, puntaje_cos=puntaje_cos
+    # , pantalla=pantalla, tactil=tactil, botones=botones, mic=mic, audio=audio, bateria=bateria, conector_c=conector_c, bluetooth=bluetooth, wifi=wifi
+    # , zona_w=zona_w, nfc=nfc, conector_a=conector_a, porta_sim=porta_sim, filtracion=filtracion
+    # ,llamadas_e=llamadas_e, llamadas_r=llamadas_r, msj_e=msj_e, msj_r=msj_r, foto_f=foto_f, foto_t=foto_t, 
+    # video_f=video_f, video_t=video_t, sen_proximidad=sen_proximidad, vibrador=vibrador, puntaje_tec=puntaje_tec, bloqueo=bloqueo,
+    # act_sw=act_sw, restauracion=restauracion, fecha_rev=fecha_rev, clasificacion=clasificacion, ert=ert, observaciones=observaciones)    
 
-    db.session.add(new_Revision)
-    db.session.commit()
+    # db.session.add(new_Revision)
+    # db.session.commit()
 
-    return jsonify({
-        "id": new_Revision.id,
-        "serie": new_Revision.serie,
-        "material": new_Revision.material,
-        "denominacion" : new_Revision.denominacion,
-        "tecnico_id"  : new_Revision.tecnico_id,
-        "fecha"  : new_Revision.fecha,
-        "encendido" : new_Revision.encendido,
-        "frontal"  : new_Revision.frontal,
-        "frontal_r"  : new_Revision.frontal_r,
-        "trasera" : new_Revision.trasera,
-        "trasera_r"  : new_Revision.trasera_r,
-        "superior"  : new_Revision.superior,
-        "superior_r" : new_Revision.superior_r,
-        "inferior"  : new_Revision.inferior,
-        "inferior_r"  : new_Revision.inferior_r,
-        "izquierdo" : new_Revision.izquierdo,
-        "izquierdo_r"  : new_Revision.izquierdo_r,
-        "derecho"  : new_Revision.derecho,
-        "derecho_r" : new_Revision.derecho_r,
-        "puntaje_cos"  : new_Revision.puntaje_cos,
-        "pantalla"  : new_Revision.pantalla,
-        "tactil" : new_Revision.tactil,
-        "mic"  : new_Revision.mic,
-        "audio"  : new_Revision.audio,
-        "bateria" : new_Revision.bateria,
-        "conector_c"  : new_Revision.conector_c,
-        "bluetooth"  : new_Revision.bluetooth,
-        "wifi" : new_Revision.wifi,
-        "zona_w"  : new_Revision.zona_w,
-        "nfc"  : new_Revision.nfc,
-        "conector_a"  : new_Revision.conector_a,
-        "porta_sim"  : new_Revision.porta_sim,
-        "filtracion"  : new_Revision.filtracion,
-        "llamadas_e"  : new_Revision.llamadas_e,
-        "llamadas_r"  : new_Revision.llamadas_r,
-        "msj_e"  : new_Revision.msj_e,
-        "msj_r"  : new_Revision.msj_r,
-        "foto_f"  : new_Revision.foto_f,
-        "foto_t"  : new_Revision.foto_t,
-        "video_f"  : new_Revision.video_f,
-        "video_t"  : new_Revision.video_t,
-        "sen_proximidad"  : new_Revision.sen_proximidad,
-        "vibrador"  : new_Revision.vibrador,
-        "puntaje_tec"  : new_Revision.puntaje_tec,
-        "bloqueo"  : new_Revision.bloqueo,
-        "act_sw"  : new_Revision.act_sw,
-        "restauracion"  : new_Revision.restauracion,
-        "fecha_rev"  : new_Revision.fecha_rev,
-        "clasificacion"  : new_Revision.clasificacion,
-        "ert"  : new_Revision.ert,
-        "observaciones"  : new_Revision.observaciones,
+    # return jsonify({
+    #     "id": new_Revision.id,
+    #     "serie": new_Revision.serie,
+    #     "material": new_Revision.material,
+    #     "denominacion" : new_Revision.denominacion,
+    #     "tecnico_id"  : new_Revision.tecnico_id,
+    #     "fecha"  : new_Revision.fecha,
+    #     "encendido" : new_Revision.encendido,
+    #     "frontal"  : new_Revision.frontal,
+    #     "frontal_r"  : new_Revision.frontal_r,
+    #     "trasera" : new_Revision.trasera,
+    #     "trasera_r"  : new_Revision.trasera_r,
+    #     "superior"  : new_Revision.superior,
+    #     "superior_r" : new_Revision.superior_r,
+    #     "inferior"  : new_Revision.inferior,
+    #     "inferior_r"  : new_Revision.inferior_r,
+    #     "izquierdo" : new_Revision.izquierdo,
+    #     "izquierdo_r"  : new_Revision.izquierdo_r,
+    #     "derecho"  : new_Revision.derecho,
+    #     "derecho_r" : new_Revision.derecho_r,
+    #     "puntaje_cos"  : new_Revision.puntaje_cos,
+    #     "pantalla"  : new_Revision.pantalla,
+    #     "tactil" : new_Revision.tactil,
+    #     "mic"  : new_Revision.mic,
+    #     "audio"  : new_Revision.audio,
+    #     "bateria" : new_Revision.bateria,
+    #     "conector_c"  : new_Revision.conector_c,
+    #     "bluetooth"  : new_Revision.bluetooth,
+    #     "wifi" : new_Revision.wifi,
+    #     "zona_w"  : new_Revision.zona_w,
+    #     "nfc"  : new_Revision.nfc,
+    #     "conector_a"  : new_Revision.conector_a,
+    #     "porta_sim"  : new_Revision.porta_sim,
+    #     "filtracion"  : new_Revision.filtracion,
+    #     "llamadas_e"  : new_Revision.llamadas_e,
+    #     "llamadas_r"  : new_Revision.llamadas_r,
+    #     "msj_e"  : new_Revision.msj_e,
+    #     "msj_r"  : new_Revision.msj_r,
+    #     "foto_f"  : new_Revision.foto_f,
+    #     "foto_t"  : new_Revision.foto_t,
+    #     "video_f"  : new_Revision.video_f,
+    #     "video_t"  : new_Revision.video_t,
+    #     "sen_proximidad"  : new_Revision.sen_proximidad,
+    #     "vibrador"  : new_Revision.vibrador,
+    #     "puntaje_tec"  : new_Revision.puntaje_tec,
+    #     "bloqueo"  : new_Revision.bloqueo,
+    #     "act_sw"  : new_Revision.act_sw,
+    #     "restauracion"  : new_Revision.restauracion,
+    #     "fecha_rev"  : new_Revision.fecha_rev,
+    #     "clasificacion"  : new_Revision.clasificacion,
+    #     "ert"  : new_Revision.ert,
+    #     "observaciones"  : new_Revision.observaciones,
         
-    })
+    # })
 
-@api.route('/revision_movil/<int:id>', methods=['PUT'])
-def updateRevisionMovil(id):
-    RevisionM = Revision_movil.query.get(id)
-    RQ = request.get_json()
-    RevisionM.id = RQ["id"]
-    RevisionM.serie = RQ["serie"]
-    RevisionM.material = RQ["material"]
-    RevisionM.denominacion = RQ["denominacion"]
-    RevisionM.tecnico_id = RQ["tecnico_id"]
-    RevisionM.fecha = RQ["fecha"]
-    RevisionM.encendido = RQ["encendido"]
-    RevisionM.frontal = RQ["frontal"]
-    RevisionM.frontal_r = RQ["frontal_r"]
-    RevisionM.trasera = RQ["trasera"]
-    RevisionM.trasera_r = RQ["trasera_r"]
-    RevisionM.superior = RQ["superior"]
-    RevisionM.superior_r = RQ["superior_r"]
-    RevisionM.inferior = RQ["inferior"]
-    RevisionM.inferior_r = RQ["inferior_r"]
-    RevisionM.izquierdo = RQ["izquierdo"]
-    RevisionM.izquierdo_r = RQ["izquierdo_r"]
-    RevisionM.derecho = RQ["derecho"]
-    RevisionM.derecho_r = RQ["derecho_r"]
-    RevisionM.puntaje_cos = RQ["puntaje_cos"]
-    RevisionM.pantalla = RQ["pantalla"]
-    RevisionM.tactil = RQ["tactil"]
-    RevisionM.botones = RQ["botones"]
-    RevisionM.mic = RQ["mic"]
-    RevisionM.audio = RQ["audio"]
-    RevisionM.bateria = RQ["bateria"]
-    RevisionM.conector_c = RQ["conector_c"]
-    RevisionM.bluetooth = RQ["bluetooth"]
-    RevisionM.wifi = RQ["wifi"]
-    RevisionM.zona_w = RQ["zona_w"]
-    RevisionM.nfc = RQ["nfc"]
-    RevisionM.conector_a = RQ["conector_a"]
-    RevisionM.porta_sim = RQ["porta_sim"]
-    RevisionM.filtracion = RQ["filtracion"]
-    RevisionM.llamadas_e = RQ["llamadas_e"]
-    RevisionM.llamadas_r = RQ["llamadas_r"]
-    RevisionM.msj_e = RQ["msj_e"]
-    RevisionM.msj_r = RQ["msj_r"]
-    RevisionM.foto_f = RQ["foto_f"]
-    RevisionM.foto_t = RQ["foto_t"]
-    RevisionM.video_f = RQ["video_f"]
-    RevisionM.video_t = RQ["video_t"]
-    RevisionM.sen_proximidad = RQ["sen_proximidad"]
-    RevisionM.vibrador = RQ["vibrador"]
-    RevisionM.puntaje_tec = RQ["puntaje_tec"]
-    RevisionM.bloqueo = RQ["bloqueo"]
-    RevisionM.act_sw = RQ["act_sw"]
-    RevisionM.restauracion = RQ["restauracion"]
-    RevisionM.fecha_rev = RQ["fecha_rev"]
-    RevisionM.clasificacion = RQ["serie"]
-    RevisionM.ert = RQ["ert"]
-    RevisionM.observaciones = RQ["observaciones"]    
-    db.session.commit()            
-    return 'ok'
+# @api.route('/revision_movil/<int:id>', methods=['PUT'])
+# def updateRevisionMovil(id):
+#     RevisionM = Revision_movil.query.get(id)
+#     RQ = request.get_json()
+#     RevisionM.id = RQ["id"]
+#     RevisionM.serie = RQ["serie"]
+#     RevisionM.material = RQ["material"]
+#     RevisionM.denominacion = RQ["denominacion"]
+#     RevisionM.tecnico_id = RQ["tecnico_id"]
+#     RevisionM.fecha = RQ["fecha"]
+#     RevisionM.encendido = RQ["encendido"]
+#     RevisionM.frontal = RQ["frontal"]
+#     RevisionM.frontal_r = RQ["frontal_r"]
+#     RevisionM.trasera = RQ["trasera"]
+#     RevisionM.trasera_r = RQ["trasera_r"]
+#     RevisionM.superior = RQ["superior"]
+#     RevisionM.superior_r = RQ["superior_r"]
+#     RevisionM.inferior = RQ["inferior"]
+#     RevisionM.inferior_r = RQ["inferior_r"]
+#     RevisionM.izquierdo = RQ["izquierdo"]
+#     RevisionM.izquierdo_r = RQ["izquierdo_r"]
+#     RevisionM.derecho = RQ["derecho"]
+#     RevisionM.derecho_r = RQ["derecho_r"]
+#     RevisionM.puntaje_cos = RQ["puntaje_cos"]
+#     RevisionM.pantalla = RQ["pantalla"]
+#     RevisionM.tactil = RQ["tactil"]
+#     RevisionM.botones = RQ["botones"]
+#     RevisionM.mic = RQ["mic"]
+#     RevisionM.audio = RQ["audio"]
+#     RevisionM.bateria = RQ["bateria"]
+#     RevisionM.conector_c = RQ["conector_c"]
+#     RevisionM.bluetooth = RQ["bluetooth"]
+#     RevisionM.wifi = RQ["wifi"]
+#     RevisionM.zona_w = RQ["zona_w"]
+#     RevisionM.nfc = RQ["nfc"]
+#     RevisionM.conector_a = RQ["conector_a"]
+#     RevisionM.porta_sim = RQ["porta_sim"]
+#     RevisionM.filtracion = RQ["filtracion"]
+#     RevisionM.llamadas_e = RQ["llamadas_e"]
+#     RevisionM.llamadas_r = RQ["llamadas_r"]
+#     RevisionM.msj_e = RQ["msj_e"]
+#     RevisionM.msj_r = RQ["msj_r"]
+#     RevisionM.foto_f = RQ["foto_f"]
+#     RevisionM.foto_t = RQ["foto_t"]
+#     RevisionM.video_f = RQ["video_f"]
+#     RevisionM.video_t = RQ["video_t"]
+#     RevisionM.sen_proximidad = RQ["sen_proximidad"]
+#     RevisionM.vibrador = RQ["vibrador"]
+#     RevisionM.puntaje_tec = RQ["puntaje_tec"]
+#     RevisionM.bloqueo = RQ["bloqueo"]
+#     RevisionM.act_sw = RQ["act_sw"]
+#     RevisionM.restauracion = RQ["restauracion"]
+#     RevisionM.fecha_rev = RQ["fecha_rev"]
+#     RevisionM.clasificacion = RQ["serie"]
+#     RevisionM.ert = RQ["ert"]
+#     RevisionM.observaciones = RQ["observaciones"]    
+#     db.session.commit()            
+#     return 'ok'
 
 
 # @api.route('/revision_movil/<int:id>', methods=['DELETE'])
