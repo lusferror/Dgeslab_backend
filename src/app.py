@@ -51,13 +51,16 @@ def getRole():
 
 #Para obtener todos los usuarios registrados
 @app.route("/user", methods=["GET"])
-@jwt_required()
+# @jwt_required()
 def getUsers():
-
-    users = User.query.all()
-    users_list = list(map(lambda x: x.serialize(), users))    
-    
-    return jsonify(users_list), 200
+    try:
+        users = User.query.all()
+        users_list = list(map(lambda x: x.serialize(), users))    
+        print(users_list)
+        return jsonify(users_list), 200
+    except Exception as e:
+        print("error: ", e)
+        return jsonify({"error":"error"}),422
 
 #Para rgistrar nuevos usuarios supervisores o técnicos
 @app.route("/register", methods=["POST"])
