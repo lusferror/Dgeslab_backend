@@ -1,6 +1,6 @@
 
 from flask import Flask, request, jsonify, url_for, Blueprint
-from models import db, Salida
+from models import db, Salida, Asignacion, Revision_movil, Equipos
 import json
 
 api = Blueprint('api', __name__)
@@ -89,8 +89,6 @@ def create_salida():
         print('Error: ', error)
         return jsonify({"message":error}), 500
 
-<<<<<<< HEAD
-=======
 @api.route("/asignacion", methods=["GET"])
 def getAsignacion():
 
@@ -149,15 +147,29 @@ def deleteAsignacion(id):
 
 # ENPOINT REVISION MOVIL
 
+@api.route("/datos_movil_basico", methods=['POST'])
+def datos_movil_basico():
+    try:
+        serie=int(request.json.get("serie"))
+        print(serie)
+        datos= Equipos.query.filter_by(serie=serie).one_or_none()
+        print("resultado: ",datos)
+        return jsonify({"result":datos})
+    except Exception as e:
+        print(e)
+        return jsonify({"msg":"error"})
+
 
 @api.route("/revision_movil", methods=["GET"])
 def getRevisionMovil():
-
-    revision = Revision_movil.query.all()
-    revision_list = list(map(lambda x: x.serialize(), revision))    
-    
-    return jsonify(revision_list)
-
+    try:
+        revision = Revision_movil.query.all()
+        revision_list = list(map(lambda x: x.serialize(), revision))    
+        
+        return jsonify(revision_list)
+    except Exception as e:
+        print(e)
+        return jsonify({"msg":"error"})
 
 
 @api.route("/revision_movil", methods=["POST"])
@@ -354,16 +366,14 @@ def deleteRevision(id):
     db.session.commit()  
     return 'reivision Borrada'
 
->>>>>>> 588324c8b597124ce404996f1ef5f09edc29c91a
-import os
-from flask import Flask, request, jsonify, url_for, Blueprint
-# from api.models import db, User
-# from api.utils import generate_sitemap, APIException
-from flask_jwt_extended import create_access_token
-from flask_jwt_extended import get_jwt_identity
-from flask_jwt_extended import jwt_required
-from typing import List
+# import os
+# from flask import Flask, request, jsonify, url_for, Blueprint
+# # from api.models import db, User
+# # from api.utils import generate_sitemap, APIException
+# from flask_jwt_extended import create_access_token
+# from flask_jwt_extended import get_jwt_identity
+# from flask_jwt_extended import jwt_required
+# from typing import List
 
-api = Blueprint('api', __name__)
 
 

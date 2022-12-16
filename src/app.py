@@ -15,6 +15,7 @@ from flask_jwt_extended import jwt_required
 from flask_jwt_extended import get_jwt_identity
 # from flask_jwt_extended import set_access_cookies
 # from flask_jwt_extended import unset_jwt_cookies
+from routes import api
 
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -45,6 +46,8 @@ Migrate(app, db)
 db.init_app(app)
 CORS(app)
 
+app.register_blueprint(api)
+
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
     return jsonify(error.to_dict()), error.status_code
@@ -70,39 +73,42 @@ def getUsers():
 #Para rgistrar nuevos usuarios supervisores o técnicos
 @app.route("/register", methods=["POST"])
 def registerUsers():
+    try:
+        body = request.get_json()
 
-    body = request.get_json()
+        date_object = datetime.datetime.now()
 
-    date_object = datetime.datetime.now()
+        create_at = date_object    
 
-    create_at = date_object    
+        if body is None:
+            return "The request body is null", 400
+        if 'name' not in body:
+            return "Add the user name", 400
+        if 'second_name' not in body:
+            return "Add user second_name", 400
+        if 'last_name' not in body:
+            return "Add user last_name", 400
+        if 'second_last_name' not in body:
+            return "Add user second_last_name", 400
+        if 'email' not in body:
+            return "Add user email", 400
+        if 'rut' not in body:
+            return "Add user rut", 400
+        if 'password' not in body:
+            return "Add user password", 400    
+        if 'role_id' not in body:
+            return "Add user rut", 400                 
 
-    if body is None:
-        return "The request body is null", 400
-    if 'name' not in body:
-        return "Add the user name", 400
-    if 'second_name' not in body:
-        return "Add user second_name", 400
-    if 'last_name' not in body:
-        return "Add user last_name", 400
-    if 'second_last_name' not in body:
-        return "Add user second_last_name", 400
-    if 'email' not in body:
-        return "Add user email", 400
-    if 'rut' not in body:
-        return "Add user rut", 400
-    if 'password' not in body:
-        return "Add user password", 400    
-    if 'role_id' not in body:
-        return "Add user rut", 400                 
+        new_user = User(name=body["name"], second_name=body["second_name"], last_name=body["last_name"], second_last_name=body["second_last_name"], email=body["email"], rut=body["rut"], password=body["password"], create_at=create_at, role_id=body["role_id"])
 
-    new_user = User(name=body["name"], second_name=body["second_name"], last_name=body["last_name"], second_last_name=body["second_last_name"], email=body["email"], rut=body["rut"], password=body["password"], create_at=create_at, role_id=body["role_id"])
+        db.session.add(new_user) 
 
-    db.session.add(new_user) 
-
-    db.session.commit()             
-    
-    return 'User was added', 200
+        db.session.commit()             
+        
+        return jsonify({"msg":'User was added'}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"msg":"error"}),500
 
 #Para registrar los roles que se asignaran a los users
 @app.route("/role", methods=["POST"])
