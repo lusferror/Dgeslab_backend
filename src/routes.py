@@ -425,5 +425,18 @@ def register_RevisionMovil():
 # from flask_jwt_extended import jwt_required
 # from typing import List
 
-
-
+@api.route('/recepcion',methods=['POST'])
+def recepcion():
+    try:
+        body=request.json.get("series")
+        for i in body:
+            serie=Equipos.query.filter_by(serie=i["Imei"]).one_or_none()
+            if serie==None:
+                nuevo_equipo= Equipos(documento_entrada=i["Doc"],folio=i["Folio"],material=i["Material"],denominacion=i["Descripcion"],serie=i["Imei"],b_origen_entrada=i["Borg"],b_destino_entrada=i["Bdest"])
+                db.session.add(nuevo_equipo)
+        db.session.commit()
+        # print(body)
+        return jsonify({"msg":"ok"}),200
+    except Exception as e:
+        print (e)
+        return jsonify({"msg":"error"}),400
