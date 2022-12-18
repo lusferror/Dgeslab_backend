@@ -2,6 +2,10 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+class Series(db.Model):
+    id=db.Column(db.Integer, primary_key=True)
+    series=db.Column(db.BigInteger)
+
 class Role(db.Model):
     id=db.Column(db.Integer, primary_key=True)
     name=db.Column(db.String(50),unique=True, nullable=False)
@@ -64,7 +68,7 @@ class Equipos(db.Model):
     fecha_folio=db.Column(db.Date)   #indica la utlimo fecha del documento sap de entrada 
     material=db.Column(db.Integer)              #codigo sku de entel
     denominacion=db.Column(db.String(100))       #descripcion del equipo
-    serie=db.Column(db.BigInteger, unique=True)  #serie identificadora del equipo
+    serie=db.Column(db.BigInteger, unique=True, nullable=False,)  #serie identificadora del equipo
     b_origen_entrada=db.Column(db.String(20), )   #bodega de origen de entrada
     b_destino_entrada=db.Column(db.String(20),)  #bodega destino de entrada, debe indicar una bodega de la empresa que produce (Ej: Yelou)
     fecha_recepcion=db.Column(db.Date)               #la utlima fecha en que se recibio el equipo fisicamente
@@ -85,7 +89,6 @@ class Equipos(db.Model):
     #---------------------------------- observaciones generales----------------------------------------------------------------
     observaciones=db.Column(db.String(250),nullable=True)
     #--------------------------------- relacion----------------------------------------------------------------------------------
-    entrada=db.relationship("Entrada", backref='equipos',lazy=True)
     # asignacion = db.relationship('user', secondary=Asignacion, lazy='subquery',
     #     backref=db.backref('equipos', lazy=True))
 
@@ -104,13 +107,13 @@ class Equipos(db.Model):
         }
 
 class Entrada(db.Model):
-    id=db.Column(db.Integer, primary_key=True)
-    documento=db.Column(db.BigInteger, nullable=True)      #indica el numero documento sap o pedido de entrada
+    # id=db.Column(db.Integer, autoincrement=True , unique=True, nullable=False)
+    documento=db.Column(db.BigInteger, primary_key=True, nullable=False)      #indica el numero documento sap o pedido de entrada
     folio=db.Column(db.BigInteger, nullable=True)          #indica la guia de despacho sap-Entel de entrada 
     fecha_folio=db.Column(db.Date)
     material=db.Column(db.Integer, nullable=True)          #codigo sku de entel
     denominacion=db.Column(db.String(100), nullable=True)       #descripcion del equipo
-    serie=db.Column(db.BigInteger, db.ForeignKey('equipos.serie'), nullable=False) #serie identificadora del equipo
+    serie=db.Column(db.BigInteger, db.ForeignKey('equipos.serie'), nullable=False, primary_key=True ) #serie identificadora del equipo
     rut_empresa=db.Column(db.String(20))    #Rut de la empresa emisora de los equipos
     b_origen=db.Column(db.String(20)) #bodega de origen de envio
     b_destino=db.Column(db.String(20)) #bodega de destino (bodega de empresa productora)
@@ -121,7 +124,10 @@ class Entrada(db.Model):
     nro_caja=db.Column(db.Integer)                              #numero de caja de almacenado, este valor puede ser nulo
     estado=db.Column(db.String(20))                            #indica lo siguiente: pendiente, verificado
     observaciones=db.Column(db.String(250),nullable=True)
-    
+    nombre=db.Column(db.String(20))
+    rut=db.Column(db.String(20))
+    # --------------------------------------- relationship -----------------------------------------------------
+    equipos=db.relationship('Equipos',backref='entrada', lazy=True)
     
 
     def __repr__(self) -> str:

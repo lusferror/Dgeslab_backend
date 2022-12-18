@@ -55,6 +55,7 @@ def getRole():
 def getUsers():
     try:
         users = User.query.all()
+        print(users)
         users_list = list(map(lambda x: x.serialize(), users))    
         print(users_list)
         return jsonify(users_list), 200
@@ -230,12 +231,11 @@ def create_token():
     user = User.query.filter_by(email=email, password=password).first()
 
     if not user:
-        return 'Email or password incorrect', 404
+        return jsonify({'msg':'Email or password incorrect',"status":"nok"}), 401
         
     access_token = create_access_token(identity=user.id)
     
-
-    return jsonify({"token": access_token}), 200
+    return jsonify({'status':'ok',"token": access_token,"rol":user.role_id,"user":user.name+" "+user.last_name}), 200
 
 @app.route("/private", methods=["GET"])
 @jwt_required()
@@ -248,7 +248,7 @@ def protected():
     role_id = user.role_id
     user_name = user.name
     
-    return jsonify({"role_id": role_id, "user_name": user_name}), 200
+    return jsonify({"role_id": role_id, "user_name": user_name+" "+user.last_name}), 200
     
 
 if __name__=='__main__':

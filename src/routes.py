@@ -1,11 +1,12 @@
 
 from flask import Flask, request, jsonify, url_for, Blueprint
-from models import db, Salida, Asignacion, Revision_movil, Equipos
+from models import db, Salida, Asignacion, Revision_movil, Equipos,Entrada,Series
 import json
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 import datetime
+from flask_sqlalchemy import SQLAlchemy
 
 
 api = Blueprint('api', __name__)
@@ -407,42 +408,35 @@ def register_RevisionMovil():
 #     db.session.commit()  
 #     return 'reivision Borrada'
 
-# import os
-# from flask import Flask, request, jsonify, url_for, Blueprint
-# # from api.models import db, User
-# # from api.utils import generate_sitemap, APIException
-# from flask_jwt_extended import create_access_token
-# from flask_jwt_extended import get_jwt_identity
-# from flask_jwt_extended import jwt_required
-# from typing import List
-
-# import os
-# from flask import Flask, request, jsonify, url_for, Blueprint
-# # from api.models import db, User
-# # from api.utils import generate_sitemap, APIException
-# from flask_jwt_extended import create_access_token
-# from flask_jwt_extended import get_jwt_identity
-# from flask_jwt_extended import jwt_required
-# from typing import List
 
 @api.route('/recepcion',methods=['POST'])
+@jwt_required()
 def recepcion():
+    
     try:
-        body=request.json.get("series")
-        lista=[]
-        for i in body:
-            serie=Equipos.query.filter_by(serie=i["Imei"]).one_or_none()
-            if serie==None:
-                nuevo_equipo= Equipos(documento_entrada=i["Doc"],folio=i["Folio"],material=i["Material"],denominacion=i["Descripcion"],serie=i["Imei"],b_origen_entrada=i["Borg"],b_destino_entrada=i["Bdest"])
-                db.session.add(nuevo_equipo)
-            else:
-                lista.append(i["Imei"])
+        registros=request.json.get("registros")
+        entrada= db.session.execute(db.insert(Entrada, registros))
         db.session.commit()
-        if len(lista)>0:
-            return jsonify({"lista":lista,"msg":"nok"}),200
-        # print(body)
-        else:
-            return jsonify({"lista":lista,"msg":"ok"}),200
+        return jsonify({"msg":"ok"})  
+    
     except Exception as e:
         print (e)
-        return jsonify({"msg":"error"}),400
+        return jsonify({"msg":"error"})
+
+@api.route('/prueba1',methods=['GET'])
+def prueba1():
+    lista=[]
+    # diferentes=db.session.execute(db.select(Entrada).distinct(Entrada.serie))
+    # diferentes=db.session.query(Entrada).distinct(Entrada.serie)
+    distintos=db.select(Entrada.serie).distinct(Entrada.serie).subquery()
+    distintos_subquery=db.aliased(Entrada,distintos,name="distintos")
+    # query=db.engine.connect().execute(db.select(Entrada).join(distintos_subquery,Entrada.serie==distintos_subquery.serie))
+    query=db.session.execute(db.select(Entrada).join(distintos_subquery,Entrada.serie==distintos_subquery.serie))
+    for row in query:
+    #     # lista.append(row.__dict__)
+    #     lista.append(row._asdict())
+        # print(row.__dict__)
+        print(row._asdict())
+    # print(len((query)))
+    # print(distintos_subquery)
+    return jsonify({"lista":"lista"})
