@@ -229,13 +229,13 @@ def create_token():
         return "Missing password", 400    
 
     user = User.query.filter_by(email=email, password=password).first()
-
+    rol=Role.query.filter_by(id=user.role_id).first()
     if not user:
         return jsonify({'msg':'Email or password incorrect',"status":"nok"}), 401
         
     access_token = create_access_token(identity=user.id)
     
-    return jsonify({'status':'ok',"token": access_token,"rol":user.role_id,"user":user.name+" "+user.last_name}), 200
+    return jsonify({'status':'ok',"token": access_token,"rol":user.role_id,"user":user.name+" "+user.last_name,"id_user":user.id, "rol_name":rol.name}), 200
 
 @app.route("/private", methods=["GET"])
 @jwt_required()
