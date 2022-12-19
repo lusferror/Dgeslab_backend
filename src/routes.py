@@ -96,43 +96,6 @@ def update_salida(id):
         print('Error: ', error)
         return jsonify({"message":error}), 500
 
-# POST varios un registro
-@api.route('/salidaArray', methods = ['PUT'])
-def update_salidaArray():
-    try:
-
-        salida = Salida()
-        array = request.json.get("salida")
-
-        for elem in array:
-            salida = Salida.query.filter_by(serie=elem["serie"]).first()
-            print('salida -->>>', salida.documento)
-            if salida is not None:
-                salida.documento = elem["documento"]
-                salida.serie = elem["serie"]
-
-                strFecha = elem["fecha_documento"]
-                fecha = datetime.datetime.strptime(strFecha, '%d/%m/%Y').date()
-                salida.fechadocumento = fecha
-
-                salida.b_origen_salida = elem["b_origen_salida"]
-                salida.b_destino_salida = elem["b_destino_salida"]
-                salida.guia_despacho = elem["guia_despacho"]
-
-                strFecha = elem["f_despacho_fisico"]
-                fecha = datetime.datetime.strptime(strFecha, '%d/%m/%Y').date()
-                salida.f_despacho_fisico = fecha
-
-                db.session.commit()
-            #     return jsonify(salida.serialize()), 200
-            # else:
-            #     return jsonify({"message":"salida not found"}), 404
-            return jsonify({"msg":"Update success"}), 200
-    except Exception as e:
-        mens=str(e)
-        error = {'Error':mens}
-        print('Error: ', error)
-        return jsonify({"message":error}), 500
 
 # POST solo un registro
 @api.route('/salida', methods = ['POST'])
@@ -180,56 +143,6 @@ def create_salida():
         print('Error: ', error)
         return jsonify({"message":error}), 500
 
-# POST varios un registro
-@api.route('/salidaArray', methods = ['POST'])
-def create_salidaArray():
-    try:
-        salida = Salida()
-        array = request.json.get("salida")
-
-        for elem in array:
-            print('serie: ', elem["serie"])
-            salida.serie = elem["serie"]
-            salida.material = elem["material"]
-            salida.denominacion = elem["denominacion"]
-            salida.empacado = elem["empacado"]
-
-            strFecha = elem["fecha_empacado"]
-            fecha = datetime.datetime.strptime(strFecha, '%d/%m/%Y').date()
-            salida.fecha_empacado = fecha
-
-            salida.responsable_id = elem["responsable_id"]
-            salida.tipo_caja = elem["tipo_caja"]
-            salida.nro_caja = elem["nro_caja"]
-
-            strFecha = elem["fecha_embalaje"]
-            fecha = datetime.datetime.strptime(strFecha, '%d/%m/%Y').date()
-            salida.fecha_embalaje = fecha
-
-            salida.documento = elem["documento"]
-            salida.guia_despacho = elem["guia_despacho"]
-            salida.b_origen_salida = elem["b_origen_salida"]
-            salida.b_destino_salida = elem["b_destino_salida"]
-
-            strFecha = elem["fecha_documento"]
-            fecha = datetime.datetime.strptime(strFecha, '%d/%m/%Y').date()
-            salida.fecha_documento = fecha
-
-            strFecha = elem["f_despacho_fisico"]
-            fecha = datetime.datetime.strptime(strFecha, '%d/%m/%Y').date()
-            salida.f_despacho_fisico = fecha
-
-            salida.revision_movil_id = elem["revision_movil_id"]
-            print('salida: ', salida)
-            db.session().add(salida)
-            db.session().commit()
-        print('salida Final: ', salida)
-        return jsonify({"msg":"save salida success"}), 201
-    except Exception as e:
-        mens=str(e)
-        error = {'Error':mens}
-        print('Error: ', error)
-        return jsonify({"message":error}), 500
 
 # @api.route("/asignacion", methods=["GET"])
 # def getAsignacion():
