@@ -118,11 +118,11 @@ class Entrada(db.Model):
     b_origen=db.Column(db.String(20)) #bodega de origen de envio
     b_destino=db.Column(db.String(20)) #bodega de destino (bodega de empresa productora)
     f_recepcion_fisica=db.Column(db.Date)                #Fecha de recepcion fisica
-    f_verificacion=db.Column(db.Date)                           #fecha de verificacion
-    responsable_ver=db.Column(db.String(10))   #quien realiza registro de la verificacion
+    f_verificacion=db.Column(db.String(50))                           #fecha de verificacion
+    responsable_ver=db.Column(db.Integer)   #quien realiza registro de la verificacion
     tipo_caja=db.Column(db.String(2))                           #tipo de caja almacenado, este valor puede ser nulo
     nro_caja=db.Column(db.Integer)                              #numero de caja de almacenado, este valor puede ser nulo
-    estado=db.Column(db.String(20))                            #indica lo siguiente: pendiente, verificado
+    estado=db.Column(db.String(20),default="Pendiente")                            #indica lo siguiente: pendiente, verificado
     observaciones=db.Column(db.String(250),nullable=True)
     nombre=db.Column(db.String(20))
     rut=db.Column(db.String(20))
@@ -259,15 +259,16 @@ class Revision_movil(db.Model):
 
 class Salida(db.Model):
     id=db.Column(db.Integer, primary_key=True)
-    serie=db.Column(db.BigInteger, unique=True, nullable=False) #serie identificadora del equipo
+    serie=db.Column(db.BigInteger, nullable=False) #serie identificadora del equipo
     material=db.Column(db.Integer)          #codigo sku de entel
     denominacion=db.Column(db.String(100))       #descripcion del equipo
     empacado=db.Column(db.Boolean)      #indica si ya esta empacado el equipo
-    fecha_empacado=db.Column(db.Date)        #fecha de empacado del equipo
-    responsable_id=db.Column(db.Integer)
+    fechaEmpacado=db.Column(db.String(50))        #fecha de empacado del equipo
+    tipoEmpaque=db.Column(db.String(30))    #tipo de empaque individual del equipo
+    responsable=db.Column(db.Integer)
     tipo_caja=db.Column(db.String(2))               #tipo de caja donde esta embalado el equipo, para este caso tendra valor fijo de "DM"
     nro_caja=db.Column(db.Integer)                  #numero de caja emitido por el sistema
-    fecha_embalaje=db.Column(db.Date)                        #fecha de embalado
+    fecha_embalaje=db.Column(db.String(50))                        #fecha de embalado
     documento=db.Column(db.BigInteger)      #indica el numero documento sap o pedido de entrada
     guia_despacho=db.Column(db.Integer)         #indica la utlima guia de despacho de la empresa productora
     b_origen_salida= db.Column(db.String(20))   #bodega de origen de salida de la empresa productora

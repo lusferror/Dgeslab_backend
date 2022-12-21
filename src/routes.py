@@ -189,70 +189,27 @@ def aprobar_asignacion():
     try:
         registros=request.json.get("lista")
         asignacion=(db.update(Asignacion).where(Asignacion.id==db.bindparam("b_id")).values(check=db.bindparam("check"),estado=db.bindparam("estado")))
-        # asignacion=(db.update(Asignacion).where(Asignacion.id==5).values(check=True,estado="Aprobado"))
         execute=db.session.execute(asignacion,registros)
         db.session.commit()
-        # print("series: ",registros  )
-        # print("consulta: ",asignacion)
         return jsonify({"msg":"ok"})
     except Exception as e:
         print(e)
         return jsonify({"msg":"nok"})
 
 
-# @api.route("/asignacion", methods=["POST"])
-# def register_asignacion():
-#     id  =  request.json.get("id",None)
-#     id_asignacion= request.json.get("id_asignacion",None)
-#     fecha_asignacion =  request.json.get("fecha_asignacion",None)
-#     serie=request.json.get("serie", None)
-#     check = request.json.get("check", None)
-#     estado= request.json.get("estado", None) 
-
-
-
-#     return jsonify({
-#         "id": new_asignacion.id,
-#         "id_asignacion": new_asignacion.id_asignacion,
-#         "fecha_asignacion": new_asignacion.fecha_asignacion,
-#         "serie" : new_asignacion.serie,
-#         "check"  : new_asignacion.check,
-#         "estado"  : new_asignacion.estado
-#     })
-
-# @api.route('/asignacion/<int:id>', methods=['PUT'])
-# def updateAsignacion(id):
-#     asignacionM = Asignacion.query.get(id)
-#     RQ = request.get_json()
-#     asignacionM.fecha_asignacion = RQ["fecha_asignacion"]
-#     asignacionM.serie = RQ["serie"]
-#     asignacionM.check = RQ["check"]
-#     asignacionM.estado = RQ["estado"]
-#     db.session.commit()            
-#     return 'ok'
-
-
-
-# @api.route('/asignacion/<int:id>', methods=['DELETE'])
-# def deleteAsignacion(id):
-#     asignacionM = Asignacion.query.get(id)
-#     db.session.delete(asignacionM)
-#     db.session.commit()  
-#     return 'Asignacion Borrada'
-    
-
-
-
-# ENPOINT REVISION MOVIL
-
 @api.route("/datos_movil_basico", methods=['POST'])
 def datos_movil_basico():
     try:
-        serie=int(request.json.get("serie"))
-        print(serie)
-        datos= Equipos.query.filter_by(serie=serie).one_or_none()
-        print("resultado: ",datos)
-        return jsonify({"denominacion":datos.denominacion})
+        serie=request.json.get("serie")
+        datos={}
+        execute=db.engine.connect().execute("select series.id,series.serie, datos_basicos.denominacion,datos_basicos.material from (select serie, revision.id from asignacion join (select id,id_asignacion from revision_movil)as revision on asignacion.id=revision.id_asignacion) as series join (select id,serie,denominacion,material from entrada join (select max(id) as max from entrada group by serie order by max asc) as diferentes on entrada.id=diferentes.max) as datos_basicos on series.serie=datos_basicos.serie where datos_basicos.serie="+serie+";")
+        for row in execute:
+            print(row._asdict())
+            datos=row._asdict()
+        if datos=={}:
+            return jsonify({"msg":"nok"})
+        else:
+            return jsonify({"msg":"ok","datos":datos})
     except Exception as e:
         print(e)
         return jsonify({"msg":"error"})
@@ -342,141 +299,6 @@ def register_RevisionMovil():
     observaciones= request.json.get("observaciones", None)
 
 
-    # new_Revision = Revision_movil( id=id, serie=serie ,material=material, denominacion=denominacion, tecnico_id=tecnico_id , fecha = fecha, encendido=encendido, 
-    # frontal=frontal, frontal_r=frontal_r, trasera=trasera, trasera_r=trasera_r, superior=superior, superior_r=superior_r, inferior=inferior
-    # , inferior_r=inferior_r, izquierdo=izquierdo, izquierdo_r=izquierdo_r, derecho=derecho, derecho_r=derecho_r, puntaje_cos=puntaje_cos
-    # , pantalla=pantalla, tactil=tactil, botones=botones, mic=mic, audio=audio, bateria=bateria, conector_c=conector_c, bluetooth=bluetooth, wifi=wifi
-    # , zona_w=zona_w, nfc=nfc, conector_a=conector_a, porta_sim=porta_sim, filtracion=filtracion
-    # ,llamadas_e=llamadas_e, llamadas_r=llamadas_r, msj_e=msj_e, msj_r=msj_r, foto_f=foto_f, foto_t=foto_t, 
-    # video_f=video_f, video_t=video_t, sen_proximidad=sen_proximidad, vibrador=vibrador, puntaje_tec=puntaje_tec, bloqueo=bloqueo,
-    # act_sw=act_sw, restauracion=restauracion, fecha_rev=fecha_rev, clasificacion=clasificacion, ert=ert, observaciones=observaciones)    
-
-    # db.session.add(new_Revision)
-    # db.session.commit()
-
-    # return jsonify({
-    #     "id": new_Revision.id,
-    #     "serie": new_Revision.serie,
-    #     "material": new_Revision.material,
-    #     "denominacion" : new_Revision.denominacion,
-    #     "tecnico_id"  : new_Revision.tecnico_id,
-    #     "fecha"  : new_Revision.fecha,
-    #     "encendido" : new_Revision.encendido,
-    #     "frontal"  : new_Revision.frontal,
-    #     "frontal_r"  : new_Revision.frontal_r,
-    #     "trasera" : new_Revision.trasera,
-    #     "trasera_r"  : new_Revision.trasera_r,
-    #     "superior"  : new_Revision.superior,
-    #     "superior_r" : new_Revision.superior_r,
-    #     "inferior"  : new_Revision.inferior,
-    #     "inferior_r"  : new_Revision.inferior_r,
-    #     "izquierdo" : new_Revision.izquierdo,
-    #     "izquierdo_r"  : new_Revision.izquierdo_r,
-    #     "derecho"  : new_Revision.derecho,
-    #     "derecho_r" : new_Revision.derecho_r,
-    #     "puntaje_cos"  : new_Revision.puntaje_cos,
-    #     "pantalla"  : new_Revision.pantalla,
-    #     "tactil" : new_Revision.tactil,
-    #     "mic"  : new_Revision.mic,
-    #     "audio"  : new_Revision.audio,
-    #     "bateria" : new_Revision.bateria,
-    #     "conector_c"  : new_Revision.conector_c,
-    #     "bluetooth"  : new_Revision.bluetooth,
-    #     "wifi" : new_Revision.wifi,
-    #     "zona_w"  : new_Revision.zona_w,
-    #     "nfc"  : new_Revision.nfc,
-    #     "conector_a"  : new_Revision.conector_a,
-    #     "porta_sim"  : new_Revision.porta_sim,
-    #     "filtracion"  : new_Revision.filtracion,
-    #     "llamadas_e"  : new_Revision.llamadas_e,
-    #     "llamadas_r"  : new_Revision.llamadas_r,
-    #     "msj_e"  : new_Revision.msj_e,
-    #     "msj_r"  : new_Revision.msj_r,
-    #     "foto_f"  : new_Revision.foto_f,
-    #     "foto_t"  : new_Revision.foto_t,
-    #     "video_f"  : new_Revision.video_f,
-    #     "video_t"  : new_Revision.video_t,
-    #     "sen_proximidad"  : new_Revision.sen_proximidad,
-    #     "vibrador"  : new_Revision.vibrador,
-    #     "puntaje_tec"  : new_Revision.puntaje_tec,
-    #     "bloqueo"  : new_Revision.bloqueo,
-    #     "act_sw"  : new_Revision.act_sw,
-    #     "restauracion"  : new_Revision.restauracion,
-    #     "fecha_rev"  : new_Revision.fecha_rev,
-    #     "clasificacion"  : new_Revision.clasificacion,
-    #     "ert"  : new_Revision.ert,
-    #     "observaciones"  : new_Revision.observaciones,
-        
-    # })
-
-# @api.route('/revision_movil/<int:id>', methods=['PUT'])
-# def updateRevisionMovil(id):
-#     RevisionM = Revision_movil.query.get(id)
-#     RQ = request.get_json()
-#     RevisionM.id = RQ["id"]
-#     RevisionM.serie = RQ["serie"]
-#     RevisionM.material = RQ["material"]
-#     RevisionM.denominacion = RQ["denominacion"]
-#     RevisionM.tecnico_id = RQ["tecnico_id"]
-#     RevisionM.fecha = RQ["fecha"]
-#     RevisionM.encendido = RQ["encendido"]
-#     RevisionM.frontal = RQ["frontal"]
-#     RevisionM.frontal_r = RQ["frontal_r"]
-#     RevisionM.trasera = RQ["trasera"]
-#     RevisionM.trasera_r = RQ["trasera_r"]
-#     RevisionM.superior = RQ["superior"]
-#     RevisionM.superior_r = RQ["superior_r"]
-#     RevisionM.inferior = RQ["inferior"]
-#     RevisionM.inferior_r = RQ["inferior_r"]
-#     RevisionM.izquierdo = RQ["izquierdo"]
-#     RevisionM.izquierdo_r = RQ["izquierdo_r"]
-#     RevisionM.derecho = RQ["derecho"]
-#     RevisionM.derecho_r = RQ["derecho_r"]
-#     RevisionM.puntaje_cos = RQ["puntaje_cos"]
-#     RevisionM.pantalla = RQ["pantalla"]
-#     RevisionM.tactil = RQ["tactil"]
-#     RevisionM.botones = RQ["botones"]
-#     RevisionM.mic = RQ["mic"]
-#     RevisionM.audio = RQ["audio"]
-#     RevisionM.bateria = RQ["bateria"]
-#     RevisionM.conector_c = RQ["conector_c"]
-#     RevisionM.bluetooth = RQ["bluetooth"]
-#     RevisionM.wifi = RQ["wifi"]
-#     RevisionM.zona_w = RQ["zona_w"]
-#     RevisionM.nfc = RQ["nfc"]
-#     RevisionM.conector_a = RQ["conector_a"]
-#     RevisionM.porta_sim = RQ["porta_sim"]
-#     RevisionM.filtracion = RQ["filtracion"]
-#     RevisionM.llamadas_e = RQ["llamadas_e"]
-#     RevisionM.llamadas_r = RQ["llamadas_r"]
-#     RevisionM.msj_e = RQ["msj_e"]
-#     RevisionM.msj_r = RQ["msj_r"]
-#     RevisionM.foto_f = RQ["foto_f"]
-#     RevisionM.foto_t = RQ["foto_t"]
-#     RevisionM.video_f = RQ["video_f"]
-#     RevisionM.video_t = RQ["video_t"]
-#     RevisionM.sen_proximidad = RQ["sen_proximidad"]
-#     RevisionM.vibrador = RQ["vibrador"]
-#     RevisionM.puntaje_tec = RQ["puntaje_tec"]
-#     RevisionM.bloqueo = RQ["bloqueo"]
-#     RevisionM.act_sw = RQ["act_sw"]
-#     RevisionM.restauracion = RQ["restauracion"]
-#     RevisionM.fecha_rev = RQ["fecha_rev"]
-#     RevisionM.clasificacion = RQ["serie"]
-#     RevisionM.ert = RQ["ert"]
-#     RevisionM.observaciones = RQ["observaciones"]    
-#     db.session.commit()            
-#     return 'ok'
-
-
-# @api.route('/revision_movil/<int:id>', methods=['DELETE'])
-# def deleteRevision(id):
-#     RevisionM = Asignacion.query.get(id)
-#     db.session.delete(RevisionM)
-#     db.session.commit()  
-#     return 'reivision Borrada'
-
-
 @api.route('/recepcion',methods=['POST'])
 @jwt_required()
 def recepcion():
@@ -522,8 +344,102 @@ def nro_caja_verficacion():
         print(e)
         return jsonify({"msg":"nok"})
 
+@api.route('/nroDocumento',methods=['POST'])
+@jwt_required()
+def nro_documento():
+    try:
+        lista=[]
+        documento=request.json.get("documento")
+        nro=Entrada.query.filter_by(documento=documento,estado="Pendiente").all()
+        if nro==None:
+            return ({"msg":"nok"})
+        else:
+            for record in nro:
+                lista.append(record.serie)
+            return jsonify({"msg":"ok","lista":lista})
+    except Exception as e:
+        print(e)
+        return jsonify({"msg":"nok"})
 
 
+# ------------------ actualiza los equipos verificados de entrada -----------------------------------------------------
+@api.route('/guardarVerficacionRecepcion',methods=['PUT'])
+@jwt_required()
+def guardar_verificacion_recepcion():
+    try:
+        lista=request.json.get("lista")
+        consulta=db.update(Entrada).where(Entrada.serie==db.bindparam("serie_b"),Entrada.documento==db.bindparam("documento_b")).values(f_verificacion=db.bindparam("f_verificacion"),\
+            responsable_ver=db.bindparam("responsable_ver"),tipo_caja=db.bindparam("tipo_caja"),estado=db.bindparam("estado"),observaciones=db.bindparam("observaciones"))
+        db.session.execute(consulta,lista)
+        db.session.commit()
+        consulta=db.select(db.func.max(Entrada.nro_caja))
+        max=db.engine.connect().execute(consulta)
+        for i in max:
+            max_r=i._asdict()
+        return jsonify({"msg":"ok","nro_caja":max_r["max_1"]})
+    except Exception as e:
+        print(e)
+        return jsonify({"msg":"nok"})
+
+@api.route('/ingresarEmpacados',methods=['POST'])
+@jwt_required()
+def actualizar_empacados():
+    try:
+        body=request.json.get("empacados")
+        actualizarEmpacados= db.insert(Salida)
+        consulta=db.session.execute(actualizarEmpacados,body)
+        db.session.commit()
+        return jsonify({"msg":"ok"})
+    except Exception as e:
+        print(e)
+        return jsonify({"msg":"nok"})
+
+@api.route('/tablaEmpacados', methods=['GET'])
+@jwt_required()
+def tabla_empacados():
+    try:
+        query=db.session.execute('select * from salida')
+        lista=list()
+        for row in query:
+            lista.append(row._asdict())
+        print(lista)
+        return jsonify({"msg":"ok","lista":lista})
+    except Exception as e:
+        print(e)
+        return jsonify({"msg":"nok"})
+
+@api.route('/verificarSerieEmbalaje',methods=['POST'])
+@jwt_required()
+def verificar_serie_emabalaje():
+    try:
+        serie=request.json.get("serie")
+        serie_salida=Salida.query.filter_by(serie=serie).one_or_none()
+        if serie_salida==None:
+            return jsonify({"msg":"nok"})
+        else:
+            return jsonify({"msg":"ok","denominacion":serie_salida.denominacion,"material":serie_salida.material,"id":serie_salida.id})
+    except Exception as e:
+        print(e)
+        return jsonify({"msg":"nok"})
+
+@api.route('/guardarEmbalaje',methods=['PUT'])
+@jwt_required()
+def guardar_emabalaje():
+    try:
+        lista=request.json.get("lista")
+        consulta=db.update(Salida).where(Salida.id==db.bindparam("id_b")).values(tipo_caja=db.bindparam("tipo_caja"),nro_caja=db.bindparam("nro_caja"),fecha_embalaje=db.bindparam("fecha_embalaje"))
+        db.session.execute(consulta,lista)
+        db.session.commit()
+        max=db.session.execute(db.select(db.func.max(Salida.nro_caja)))
+        resulMax={}
+        for i in max:
+            resulMax=i._asdict()
+        
+        print(resulMax)
+        return jsonify({"msg":"ok","nro_caja":resulMax["max"]})
+    except Exception as e :
+        print(e)
+        return jsonify({"msg":"nok"})
 
 @api.route('/borrarRegistroRecepcion',methods=['DELETE'])
 @jwt_required()
@@ -535,20 +451,15 @@ def borrar_registros_recepcion():
 @api.route('/prueba1',methods=['GET'])
 def prueba1():
     lista=[]
-    # diferentes=db.session.execute(db.select(Entrada).distinct(Entrada.serie))
-    # diferentes=db.session.query(Entrada).distinct(Entrada.serie)
-    distintos=db.select(Equipos.serie).subquery()
-    distintos_subquery=db.aliased(Equipos,distintos,name="distintos")
-    q=(db.select(Entrada.serie).distinct(Entrada.serie).join(distintos_subquery,Entrada.serie!=distintos_subquery.serie,isouter = True).subquery())
-    query=db.insert(Equipos).from_select(["serie"],q)
-    execute=db.session.execute(query)
-    db.session.commit()
-    # query=db.session.execute(db.select(Entrada).join(distintos_subquery,Entrada.serie==distintos_subquery.serie))
-    # for row in query:
-    # #     # lista.append(row.__dict__)
-    # #     lista.append(row._asdict())
-    #     # print(row.__dict__)
-    #     print(row._asdict())
-    print(query)
-    # print(distintos_subquery)
+    # max=db.select(db.func.max(Entrada.id)).group_by(Entrada.serie).subquery()
+    # maxAlias=db.aliased(Entrada,max)
+    # ordermax=db.select(max).order_by(db.asc(max)).subquery()
+    # ordermaxAlias=db.aliased(Entrada,ordermax)
+    # join=db.select(Entrada.serie,Entrada.denominacion,Entrada.material).select_from(Entrada).join(ordermaxAlias, Entrada.id==ordermaxAlias)
+    execute=db.engine.connect().execute("select series.id,series.serie, datos_basicos.denominacion,datos_basicos.material from (select serie, revision.id from asignacion join (select id,id_asignacion from revision_movil)as revision on asignacion.id=revision.id_asignacion) as series join (select id,serie,denominacion,material from entrada join (select max(id) as max from entrada group by serie order by max asc) as diferentes on entrada.id=diferentes.max) as datos_basicos on series.serie=datos_basicos.serie;")
+    for row in execute:
+        print(row._asdict())
+    # print(join)
+    print(len(list(execute)))
+
     return jsonify({"lista":"lista"})
