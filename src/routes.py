@@ -1,13 +1,13 @@
 
 from flask import Flask, request, jsonify, url_for, Blueprint
-from models import db, Salida, Asignacion, Revision_movil, Equipos,Entrada,Series
+from models import db, Salida, Asignacion, Revision_movil, Equipos,Entrada,Series, User
 import json
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 import datetime
 from flask_sqlalchemy import SQLAlchemy
-
+from sqlalchemy.sql import text
 
 api = Blueprint('api', __name__)
 
@@ -144,14 +144,85 @@ def create_salida():
         print('Error: ', error)
         return jsonify({"message":error}), 500
 
+@api.route("/asignacionUsers", methods=["GET"])
+@jwt_required()
+def getAsignacion():
+    try:
+        users=db.engine.connect().execute(db.select(User))
+        list_user=[]
+        for user in users:
+            list_user.append(user._asdict())
+        return jsonify({"msg":"ok","list_users":list_user}),200
+    except Exception as e:
+        print("Error: ",e)
+        return jsonify({"msg":"nok"}),400
 
-# @api.route("/asignacion", methods=["GET"])
-# def getAsignacion():
+@api.route('/serieAsignacion',methods=['POST'])
+@jwt_required()
+def serie_asignacion():
+    try:
+        body=request.json.get("serie")
+        serie=Equipos.query.filter_by(serie=body).first()
+        print(serie)
+        if serie!=None:
+            return jsonify({"msg":"ok"}),200
+        else:
+            return jsonify({"msg":"nok"}),200
+    except Exception as e:
+        print(e)
+        return jsonify({"msg":"nok"}),400
 
-#     asignacion = Asignacion.query.all()
-#     asignacion_list = list(map(lambda x: x.serialize(), asignacion))    
-    
-#     return jsonify(asignacion_list)
+@api.route('/asignacionGuardar',methods=['POST'])
+@jwt_required()
+def asignacion_guardar():
+    try:
+        series=request.json.get("lista")
+        registro=(db.insert(Asignacion,series))
+        asignacion=db.session.execute(registro)
+        db.session.commit()
+        return jsonify({"msg":"ok"})
+    except Exception as e:
+        print(e)
+        return jsonify({"msg":"nok"}),404
+
+@api.route('/listaAprobacion', methods=['POST'])
+@jwt_required() 
+def lista_aprobacion():
+    try:
+        rol=request.json.get("rol")
+        id=request.json.get("id")
+        lista=[]
+        if rol=="1":
+            aprobacion=db.engine.connect().execute(db.select(Asignacion))
+            for record in aprobacion:
+                lista.append(record._asdict())
+            return jsonify({"msg":"ok","lista":lista}),200
+        else:
+            consulta=(db.select(Asignacion).where(Asignacion.tecnico_id==int(id)))
+            aprobacion=db.engine.connect().execute(consulta)
+            print(consulta)
+            for record in aprobacion:
+                lista.append(record._asdict())
+            print(lista)
+            return jsonify({"msg":"ok","lista":lista}),200
+    except Exception as e:
+        print("EL ERROR: ",e)
+        return jsonify({"msg":"nok"}),404
+
+@api.route('/aprobarAsignacion',methods=['PUT'])
+def aprobar_asignacion():
+    try:
+        registros=request.json.get("lista")
+        asignacion=(db.update(Asignacion).where(Asignacion.id==db.bindparam("b_id")).values(check=db.bindparam("check"),estado=db.bindparam("estado")))
+        # asignacion=(db.update(Asignacion).where(Asignacion.id==5).values(check=True,estado="Aprobado"))
+        execute=db.session.execute(asignacion,registros)
+        db.session.commit()
+        # print("series: ",registros  )
+        # print("consulta: ",asignacion)
+        return jsonify({"msg":"ok"})
+    except Exception as e:
+        print(e)
+        return jsonify({"msg":"nok"})
 
 
 # @api.route("/asignacion", methods=["POST"])
@@ -164,10 +235,6 @@ def create_salida():
 #     estado= request.json.get("estado", None) 
 
 
-#     new_asignacion = Asignacion( id=id, id_asignacion=id_asignacion ,fecha_asignacion=fecha_asignacion, serie=serie , check = check, estado=estado)    
-
-#     db.session.add(new_asignacion)
-#     db.session.commit()
 
 #     return jsonify({
 #         "id": new_asignacion.id,
@@ -215,17 +282,130 @@ def datos_movil_basico():
         print(e)
         return jsonify({"msg":"error"})
 
+@api.route("/datos_revision_movil/<int:serie>", methods=["GET"])
+# @jwt_required()
+def get_DatosRevisionMovil(serie):
+    connection = db.engine.connect()
+    strSerie = str(serie)
+    query = "select asignacion.serie, datos_basicos.denominacion,datos_basicos.material from asignacion join (select serie,denominacion,material from entrada join (select max(id) as m from entrada group by serie order by m asc) as id_entrada on id_entrada.m=entrada.id) as datos_basicos on asignacion.serie=datos_basicos.serie where asignacion.serie = %s" % strSerie
+    result = connection.execute(query)        
+    for equipo in result:
+        res = equipo._asdict()
+    print('result:', res)
+    return jsonify({"result":res})
+    # strSerie = str(serie)
+    # lista = list()
+    # sql = " :p"
+    # equipo = db.session.execute(sql, p=strSerie)
+    # print('Datos: ', equipo)
+
 
 @api.route("/revision_movil", methods=["GET"])
+# @jwt_required()
 def getRevisionMovil():
-    try:
-        revision = Revision_movil.query.all()
-        revision_list = list(map(lambda x: x.serialize(), revision))    
+    # try:
+    #     revision = Revision_movil.query.all()
+    #     revision_list = list(map(lambda x: x.serialize(), revision))    
         
-        return jsonify(revision_list)
+    #     return jsonify(revision_list)
+    # except Exception as e:
+    #     print(e)
+    #     return jsonify({"msg":"error"})
+    try:
+        # revisiones = db.session.query(Revision_movil).all()
+        # query = (db.select(Revision_movil).join(Revision_movil.id_asignacion))
+        # revisiones = db.session.scalars(query).all()
+        # print('revisiones-->>', revisiones)
+        lista = list()
+        equipos = db.session.execute('select series.id,series.serie, datos_basicos.denominacion,datos_basicos.material from (select serie, revision.id from asignacion join (select id,id_asignacion from revision_movil)as revision on asignacion.id=revision.id_asignacion) as series join (select id,serie,denominacion,material from entrada join (select max(id) as max from entrada group by serie order by max asc) as diferentes on entrada.id=diferentes.max) as datos_basicos on series.serie=datos_basicos.serie;')
+        for equipo in equipos:
+            lista.append(equipo._asdict())
+
+
+        list_rev = list()
+        for r, a, e, u in db.session.query(Revision_movil, Asignacion, Equipos, User).filter(Revision_movil.id_asignacion == Asignacion.id).filter(Asignacion.serie == Equipos.serie).filter(Asignacion.tecnico_id == User.id).all():
+        # for revision in revisiones:
+            print('salida-->>', r.id)
+            # fecha_embalaje = revision.fecha_embalaje.strftime('%d/%m/%Y')            
+            # fecha_empacado = revision.fecha_empacado.strftime('%d/%m/%Y')            
+            # fecha_documento = revision.fecha_documento.strftime('%d/%m/%Y')            
+            # f_despacho_fisico = revision.f_despacho_fisico.strftime('%d/%m/%Y')            
+            list_rev.append(
+                {
+                    # "id": r.id, 
+                    "encendido": r.encendido, 
+                    "frontal": r.frontal, 
+                    "frontal_r": r.frontal_r,
+                    "trasera": r.trasera, 
+                    "trasera_r": r.trasera_r,
+                    "superior": r.superior,
+                    "superior_r": r.superior_r,
+                    "inferior": r.inferior,
+                    "inferior_r": r.inferior_r,
+                    "izquierdo": r.izquierdo, 
+                    "izquierdo_r": r.izquierdo_r, 
+                    "derecho": r.derecho, 
+                    "derecho_r": r.derecho_r,
+                    "puntaje_cos": r.puntaje_cos, 
+                    "pantalla": r.pantalla,
+                    "tactil": r.tactil,
+                    "botones": r.botones,
+                    "mic": r.mic,
+                    "audio": r.audio,
+                    "bateria": r.bateria,
+                    "conector_c": r.conector_c,
+                    "bluetooth": r.bluetooth,
+                    "wifi": r.wifi,
+                    "zona_w": r.zona_w,
+                    "nfc": r.nfc,
+                    "conector_a": r.conector_a,
+                    "porta_sim": r.porta_sim,
+                    "filtracion": r.filtracion,
+                    "llamadas_e": r.llamadas_e,
+                    "llamadas_r": r.llamadas_r,
+                    "msj_e": r.msj_e,
+                    "msj_r": r.msj_r,
+                    "foto_f": r.foto_f,
+                    "foto_t": r.foto_t,
+                    "video_f": r.video_f,
+                    "video_t": r.video_t,
+                    "sen_proximidad": r.sen_proximidad,
+                    "vibrador": r.vibrador,
+                    "puntaje_tec": r.puntaje_tec,
+                    "bloqueo": r.bloqueo,
+                    "act_sw": r.act_sw,
+                    "restauracion": r.restauracion,
+                    "fecha_rev": r.fecha_rev,
+                    "clasificacion": r.clasificacion,
+                    "ert": r.ert,
+                    "observaciones": r.observaciones,
+                    "id_asignacion": r.id_asignacion,
+
+                    "serie": a.serie,
+                    "fecha_asignacion": a.fecha_asignacion,
+                    # "tecnico_id": a.tecnico_id,
+                    # "check": a.check,
+                    # "estado": a.estado,
+
+                    "material": e.material,
+                    # "serieEquipo": e.serie,
+                    "denominacion": e.denominacion,
+                    "nom_tecnico": u.name  + " " + u.last_name
+                })
+        print(list_rev)
+
+        for listaRev in list_rev:
+            for lista_id in lista:
+                if(listaRev["serie"] == lista_id["serie"]):
+                    listaRev["material"] = lista_id["material"]
+                    listaRev["denominacion"] = lista_id["denominacion"]
+
+        return jsonify({"status":"ok","salida": list_rev}), 200
     except Exception as e:
-        print(e)
-        return jsonify({"msg":"error"})
+        mens=str(e)
+        error = {'Error':mens}
+        print('Error: ', error)
+        return jsonify({"message":error}), 500
 
 
 @api.route("/revision_movil", methods=["POST"])
@@ -442,6 +622,11 @@ def recepcion():
     try:
         registros=request.json.get("registros")
         entrada= db.session.execute(db.insert(Entrada, registros))
+        distintos=db.select(Equipos.serie).subquery()
+        distintos_subquery=db.aliased(Equipos,distintos,name="distintos")
+        q=(db.select(Entrada.serie).distinct(Entrada.serie).join(distintos_subquery,Entrada.serie!=distintos_subquery.serie,isouter = True).subquery())
+        query=db.insert(Equipos).from_select(["serie"],q)
+        execute=db.session.execute(query)
         db.session.commit()
         return jsonify({"msg":"ok"})  
     
@@ -449,20 +634,75 @@ def recepcion():
         print (e)
         return jsonify({"msg":"error"})
 
+@api.route('/registrosRecepcion', methods=['GET'])
+@jwt_required()
+def registros_recepcion():
+    try:
+        entrada=db.engine.connect().execute(db.select(Entrada))
+        lista=[]
+        for row in entrada:
+            lista.append(row._asdict())
+        return jsonify({"status":"ok","lista":lista})
+    except Exception as e:
+        print(e)
+        return jsonify({"status":"nok"})
+
+@api.route('/nroCajaVerificacion', methods=['GET'])
+@jwt_required()
+def nro_caja_verficacion():
+    try:
+        consulta=db.select(db.func.max(Entrada.nro_caja))
+        max=db.engine.connect().execute(consulta)
+        for i in max:
+            max_r=i._asdict()
+        return jsonify({"msg":"ok","result":max_r["max_1"]})
+    except Exception as e:
+        print(e)
+        return jsonify({"msg":"nok"})
+
+
+
+
+@api.route('/borrarRegistroRecepcion',methods=['DELETE'])
+@jwt_required()
+def borrar_registros_recepcion():
+    return
+# queda esta funcion en standby
+
+
 @api.route('/prueba1',methods=['GET'])
 def prueba1():
     lista=[]
     # diferentes=db.session.execute(db.select(Entrada).distinct(Entrada.serie))
     # diferentes=db.session.query(Entrada).distinct(Entrada.serie)
-    distintos=db.select(Entrada.serie).distinct(Entrada.serie).subquery()
-    distintos_subquery=db.aliased(Entrada,distintos,name="distintos")
-    # query=db.engine.connect().execute(db.select(Entrada).join(distintos_subquery,Entrada.serie==distintos_subquery.serie))
-    query=db.session.execute(db.select(Entrada).join(distintos_subquery,Entrada.serie==distintos_subquery.serie))
-    for row in query:
-    #     # lista.append(row.__dict__)
-    #     lista.append(row._asdict())
-        # print(row.__dict__)
-        print(row._asdict())
-    # print(len((query)))
+    distintos=db.select(Equipos.serie).subquery()
+    distintos_subquery=db.aliased(Equipos,distintos,name="distintos")
+    q=(db.select(Entrada.serie).distinct(Entrada.serie).join(distintos_subquery,Entrada.serie!=distintos_subquery.serie,isouter = True).subquery())
+    query=db.insert(Equipos).from_select(["serie"],q)
+    execute=db.session.execute(query)
+    db.session.commit()
+    # query=db.session.execute(db.select(Entrada).join(distintos_subquery,Entrada.serie==distintos_subquery.serie))
+    # for row in query:
+    # #     # lista.append(row.__dict__)
+    # #     lista.append(row._asdict())
+    #     # print(row.__dict__)
+    #     print(row._asdict())
+    print(query)
     # print(distintos_subquery)
     return jsonify({"lista":"lista"})
+
+@api.route("/equipos", methods=["GET"])
+# @jwt_required()
+def getEquipos():
+    try:
+        lista = list()
+        # equipos = Equipos.query.all()
+        # equipos_list = list(map(lambda x: x.serialize(), equipos))
+        equipos = db.session.execute('select series.id,series.serie, datos_basicos.denominacion,datos_basicos.material from (select serie, revision.id from asignacion join (select id,id_asignacion from revision_movil)as revision on asignacion.id=revision.id_asignacion) as series join (select id,serie,denominacion,material from entrada join (select max(id) as max from entrada group by serie order by max asc) as diferentes on entrada.id=diferentes.max) as datos_basicos on series.serie=datos_basicos.serie;')
+        for equipo in equipos:
+            lista.append(equipo._asdict())
+        return jsonify(lista)
+        # return jsonify(equipos_list)
+    except Exception as e:
+        print(e)
+        return jsonify({"msg":"error"})
