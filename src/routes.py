@@ -7,7 +7,7 @@ from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 import datetime
 from flask_sqlalchemy import SQLAlchemy
-
+from sqlalchemy.sql import text
 
 api = Blueprint('api', __name__)
 
@@ -23,17 +23,29 @@ def get_salida():
         list_sal = list()
         for salida in salidas:
             print('salida-->>', salida.serie)
+            fecha_embalaje = salida.fecha_embalaje.strftime('%d/%m/%Y')            
+            fecha_empacado = salida.fecha_empacado.strftime('%d/%m/%Y')            
             fecha_documento = salida.fecha_documento.strftime('%d/%m/%Y')            
             f_despacho_fisico = salida.f_despacho_fisico.strftime('%d/%m/%Y')            
             list_sal.append(
                 {
-                    "documento": salida.documento, 
+                    "id": salida.id, 
                     "serie": salida.serie, 
-                    "fecha_documento": fecha_documento, 
+                    "material": salida.material, 
+                    "denominacion": salida.denominacion,
+                    "empacado": salida.empacado, 
+                    "fecha_empacado": fecha_empacado,
+                    "responsable_id": salida.responsable_id,
+                    "tipo_caja": salida.tipo_caja,
+                    "nro_caja": salida.nro_caja,
+                    "fecha_embalaje": fecha_embalaje,
+                    "documento": salida.documento, 
+                    "guia_despacho": salida.guia_despacho, 
                     "b_origen_salida": salida.b_origen_salida, 
                     "b_destino_salida": salida.b_destino_salida, 
-                    "guia_despacho": salida.guia_despacho, 
-                    "f_despacho_fisico": f_despacho_fisico
+                    "fecha_documento": fecha_documento, 
+                    "f_despacho_fisico": f_despacho_fisico,
+                    "revision_movil_id": salida.revision_movil_id
                 })
         print(list_sal)
         return jsonify({"salida": list_sal}), 200
@@ -43,7 +55,18 @@ def get_salida():
         print('Error: ', error)
         return jsonify({"message":error}), 500
 
+#Para borrar tabla salida
+@api.route('/salida/<int:serie>', methods=['DELETE'])
+def deleteSalida(serie):
+    salida = Salida.query.filter_by(serie=serie).first()
+    if salida == None:
+        return "User not found", 404
+    db.session.delete(salida)
+    db.session.commit()  
+    return jsonify({"message":"salida delete success"}), 200
 
+
+# PUT solo un registro
 @api.route('/salida/<int:id>', methods = ['PUT'])
 def update_salida(id):
     try:
@@ -74,6 +97,8 @@ def update_salida(id):
         print('Error: ', error)
         return jsonify({"message":error}), 500
 
+
+# POST solo un registro
 @api.route('/salida', methods = ['POST'])
 def create_salida():
     try:
@@ -214,17 +239,130 @@ def datos_movil_basico():
         print(e)
         return jsonify({"msg":"error"})
 
+@api.route("/datos_revision_movil/<int:serie>", methods=["GET"])
+# @jwt_required()
+def get_DatosRevisionMovil(serie):
+    connection = db.engine.connect()
+    strSerie = str(serie)
+    query = "select asignacion.serie, datos_basicos.denominacion,datos_basicos.material from asignacion join (select serie,denominacion,material from entrada join (select max(id) as m from entrada group by serie order by m asc) as id_entrada on id_entrada.m=entrada.id) as datos_basicos on asignacion.serie=datos_basicos.serie where asignacion.serie = %s" % strSerie
+    result = connection.execute(query)        
+    for equipo in result:
+        res = equipo._asdict()
+    print('result:', res)
+    return jsonify({"result":res})
+    # strSerie = str(serie)
+    # lista = list()
+    # sql = " :p"
+    # equipo = db.session.execute(sql, p=strSerie)
+    # print('Datos: ', equipo)
+
 
 @api.route("/revision_movil", methods=["GET"])
+# @jwt_required()
 def getRevisionMovil():
-    try:
-        revision = Revision_movil.query.all()
-        revision_list = list(map(lambda x: x.serialize(), revision))    
+    # try:
+    #     revision = Revision_movil.query.all()
+    #     revision_list = list(map(lambda x: x.serialize(), revision))    
         
-        return jsonify(revision_list)
+    #     return jsonify(revision_list)
+    # except Exception as e:
+    #     print(e)
+    #     return jsonify({"msg":"error"})
+    try:
+        # revisiones = db.session.query(Revision_movil).all()
+        # query = (db.select(Revision_movil).join(Revision_movil.id_asignacion))
+        # revisiones = db.session.scalars(query).all()
+        # print('revisiones-->>', revisiones)
+        lista = list()
+        equipos = db.session.execute('select series.id,series.serie, datos_basicos.denominacion,datos_basicos.material from (select serie, revision.id from asignacion join (select id,id_asignacion from revision_movil)as revision on asignacion.id=revision.id_asignacion) as series join (select id,serie,denominacion,material from entrada join (select max(id) as max from entrada group by serie order by max asc) as diferentes on entrada.id=diferentes.max) as datos_basicos on series.serie=datos_basicos.serie;')
+        for equipo in equipos:
+            lista.append(equipo._asdict())
+
+
+        list_rev = list()
+        for r, a, e, u in db.session.query(Revision_movil, Asignacion, Equipos, User).filter(Revision_movil.id_asignacion == Asignacion.id).filter(Asignacion.serie == Equipos.serie).filter(Asignacion.tecnico_id == User.id).all():
+        # for revision in revisiones:
+            print('salida-->>', r.id)
+            # fecha_embalaje = revision.fecha_embalaje.strftime('%d/%m/%Y')            
+            # fecha_empacado = revision.fecha_empacado.strftime('%d/%m/%Y')            
+            # fecha_documento = revision.fecha_documento.strftime('%d/%m/%Y')            
+            # f_despacho_fisico = revision.f_despacho_fisico.strftime('%d/%m/%Y')            
+            list_rev.append(
+                {
+                    # "id": r.id, 
+                    "encendido": r.encendido, 
+                    "frontal": r.frontal, 
+                    "frontal_r": r.frontal_r,
+                    "trasera": r.trasera, 
+                    "trasera_r": r.trasera_r,
+                    "superior": r.superior,
+                    "superior_r": r.superior_r,
+                    "inferior": r.inferior,
+                    "inferior_r": r.inferior_r,
+                    "izquierdo": r.izquierdo, 
+                    "izquierdo_r": r.izquierdo_r, 
+                    "derecho": r.derecho, 
+                    "derecho_r": r.derecho_r,
+                    "puntaje_cos": r.puntaje_cos, 
+                    "pantalla": r.pantalla,
+                    "tactil": r.tactil,
+                    "botones": r.botones,
+                    "mic": r.mic,
+                    "audio": r.audio,
+                    "bateria": r.bateria,
+                    "conector_c": r.conector_c,
+                    "bluetooth": r.bluetooth,
+                    "wifi": r.wifi,
+                    "zona_w": r.zona_w,
+                    "nfc": r.nfc,
+                    "conector_a": r.conector_a,
+                    "porta_sim": r.porta_sim,
+                    "filtracion": r.filtracion,
+                    "llamadas_e": r.llamadas_e,
+                    "llamadas_r": r.llamadas_r,
+                    "msj_e": r.msj_e,
+                    "msj_r": r.msj_r,
+                    "foto_f": r.foto_f,
+                    "foto_t": r.foto_t,
+                    "video_f": r.video_f,
+                    "video_t": r.video_t,
+                    "sen_proximidad": r.sen_proximidad,
+                    "vibrador": r.vibrador,
+                    "puntaje_tec": r.puntaje_tec,
+                    "bloqueo": r.bloqueo,
+                    "act_sw": r.act_sw,
+                    "restauracion": r.restauracion,
+                    "fecha_rev": r.fecha_rev,
+                    "clasificacion": r.clasificacion,
+                    "ert": r.ert,
+                    "observaciones": r.observaciones,
+                    "id_asignacion": r.id_asignacion,
+
+                    "serie": a.serie,
+                    "fecha_asignacion": a.fecha_asignacion,
+                    # "tecnico_id": a.tecnico_id,
+                    # "check": a.check,
+                    # "estado": a.estado,
+
+                    "material": e.material,
+                    # "serieEquipo": e.serie,
+                    "denominacion": e.denominacion,
+                    "nom_tecnico": u.name  + " " + u.last_name
+                })
+        print(list_rev)
+
+        for listaRev in list_rev:
+            for lista_id in lista:
+                if(listaRev["serie"] == lista_id["serie"]):
+                    listaRev["material"] = lista_id["material"]
+                    listaRev["denominacion"] = lista_id["denominacion"]
+
+        return jsonify({"status":"ok","salida": list_rev}), 200
     except Exception as e:
-        print(e)
-        return jsonify({"msg":"error"})
+        mens=str(e)
+        error = {'Error':mens}
+        print('Error: ', error)
+        return jsonify({"message":error}), 500
 
 
 @api.route("/revision_movil", methods=["POST"])
@@ -463,3 +601,19 @@ def prueba1():
     print(len(list(execute)))
 
     return jsonify({"lista":"lista"})
+
+@api.route("/equipos", methods=["GET"])
+# @jwt_required()
+def getEquipos():
+    try:
+        lista = list()
+        # equipos = Equipos.query.all()
+        # equipos_list = list(map(lambda x: x.serialize(), equipos))
+        equipos = db.session.execute('select series.id,series.serie, datos_basicos.denominacion,datos_basicos.material from (select serie, revision.id from asignacion join (select id,id_asignacion from revision_movil)as revision on asignacion.id=revision.id_asignacion) as series join (select id,serie,denominacion,material from entrada join (select max(id) as max from entrada group by serie order by max asc) as diferentes on entrada.id=diferentes.max) as datos_basicos on series.serie=datos_basicos.serie;')
+        for equipo in equipos:
+            lista.append(equipo._asdict())
+        return jsonify(lista)
+        # return jsonify(equipos_list)
+    except Exception as e:
+        print(e)
+        return jsonify({"msg":"error"})
