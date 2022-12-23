@@ -6,5 +6,4 @@ flask-sqlalchemy
 flask-swagger
 sqlalchemy
 Flask-JWT-Extended
-Flask-MySQL
-Flask-MySQLdb
+
