@@ -1,6 +1,6 @@
 flask
 flask-admin
-flask-cor
+flask-cors
 flask-migrate
 flask-sqlalchemy
 flask-swagger
